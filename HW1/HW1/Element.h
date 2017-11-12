@@ -4,7 +4,7 @@
 
 class Element {
 public:
-	Element::Element(int id, int left, int top, int right, int down);
+	Element(int id, int left, int top, int right, int down);
 	
 	int id;
 	int left;

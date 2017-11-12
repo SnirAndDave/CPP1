@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "Puzzle.cpp"
+#include "Puzzle.h"
 #include <vector>
 #include <algorithm>
 
@@ -15,16 +15,19 @@ using namespace std;
 class Parser
 {
 public:
-	void parse(const string& filePath, Puzzle& puzzle);
+	void getMissingElements(const Puzzle& puzzle, vector<int>& missingElements);
+	bool parse(ifstream& fin, Puzzle& puzzle, ofstream& fout);
 	
 	int processFirstLine(const string& line);
+	int parseEdge(string edge);
 
 
-	Element processLine(const string& line);
+	void processLine(const string& line, vector<int>& wrong_ids, vector<string>& wrong_lines, int elementsCount, vector<Element>& elements);
 	void cleanSpaces(string& str);
 	std::vector<std::string> split(const std::string &s, char delim);
 	
 private:
+
 };
 
 #endif

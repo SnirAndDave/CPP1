@@ -3,14 +3,13 @@
 #define __PUZZLE_H_INCLUDED__
 #include "Element.h"
 #include <list>
+#include <vector>
 using namespace std;
 class  Puzzle
 {
 public:
-	Puzzle::Puzzle(const list<Element>& elements, const list<Element>::iterator& element, unsigned size);
 
-	std::list<Element> elements;
-	std::list<Element>::iterator it;
+	std::vector<Element> elements;
 	unsigned int size;
 };
 
