@@ -112,8 +112,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Element.cpp" />
+    <ClCompile Include="..\..\Main.cpp" />
     <ClCompile Include="..\..\Parser.cpp" />
     <ClCompile Include="..\..\Puzzle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Element.h" />
+    <ClInclude Include="..\..\Parser.h" />
+    <ClInclude Include="..\..\Puzzle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,13 +1,13 @@
 #include <list>
-#include "stdafx.h"
-
-#include "Element.cpp"
+#include "Puzzle.h"
 using namespace std;
 
-class  Puzzle
-{
-public:
-	list<Element> elements;
-	list<Element>::iterator it;
-	unsigned int size;
-};
+
+	Puzzle::Puzzle(const list<Element>& elements, const list<Element>::iterator& element, unsigned size)
+		: elements(elements),
+		  it(element),
+		  size(size)
+	{
+	}
+
+
