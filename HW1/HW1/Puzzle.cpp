@@ -1,4 +1,6 @@
 #include <list>
+#include "stdafx.h"
+
 #include "Element.cpp"
 using namespace std;
 
