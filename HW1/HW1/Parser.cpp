@@ -14,6 +14,7 @@ public:
 		puzzle.it = puzzle.elements.begin();
 		ifstream fin(filePath); //creating an ifstream object and opening file in path attackPath 
 		string line;
+		string snir;
 
 		//get first line
 		getline(fin, line);
