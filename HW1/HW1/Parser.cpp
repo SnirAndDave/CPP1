@@ -17,6 +17,7 @@ public:
 
 		//get first line
 		getline(fin, line);
+		puzzle.size = stoi(line);
 
 		//read rest of file
 		while (getline(fin, line)) //getline returns null if we get to end of file.
@@ -24,10 +25,12 @@ public:
 			Element elem = this->processLine(line);
 			puzzle.elements.insert(puzzle.it, elem);
 		}
+		
 	}
 
 	Element processLine(const string& line)
 	{
+		
 	}
 
 
