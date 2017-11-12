@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include "Parser.h"
+#include <iterator>
 
 using namespace std;
 
@@ -17,7 +18,7 @@ void Parser::getMissingElements(const Puzzle& puzzle, vector<int>& missingElemen
 		// assume that each id has value < puzzle.size (it is checked)
 		ids[it->id] = true;
 	}
-	for (int i = 1; i < puzzle.size + 1; i++)
+	for (auto i = 1; i < puzzle.size + 1; i++)
 	{
 		if (!ids[i])
 		{
@@ -25,6 +26,48 @@ void Parser::getMissingElements(const Puzzle& puzzle, vector<int>& missingElemen
 			missingElements.push_back(i);
 		}
 	}
+}
+
+bool Parser::checkIfValidAndReportError(const Puzzle& puzzle, ofstream& fout, vector<int>& missing_elements,
+                                        vector<int>& wrong_ids, vector<string>& badFormatLines)
+{
+	bool isValid = true;
+	getMissingElements(puzzle, missing_elements);
+	if (!missing_elements.empty())
+	{
+		std::ostringstream oss;
+		oss << "Missing puzzle element(s) with the following IDs: ";
+		isValid = false;
+		copy(missing_elements.begin(), missing_elements.end() - 1,
+		     ostream_iterator<int>(oss, ", "));
+
+		// Now add the last element with no delimiter
+		oss << missing_elements.back();
+		fout << oss.str() << endl;
+	}
+	if (!wrong_ids.empty())
+	{
+		std::ostringstream oss;
+		oss << "Puzzle of size <" << puzzle.size << "> cannot have the following IDs:";
+		isValid = false;
+		copy(wrong_ids.begin(), wrong_ids.end() - 1,
+		     ostream_iterator<int>(oss, ", "));
+
+		// Now add the last element with no delimiter
+		oss << wrong_ids.back();
+		fout << oss.str() << endl;
+	}
+	if (!badFormatLines.empty())
+	{
+		isValid = false;
+		for (auto const& line : badFormatLines)
+		{
+			vector<string> delimited = split(line, ' ');
+			int id = stoi(delimited[0]);
+			fout << "Puzzle ID <" << id << "> has wrong data: " << line;
+		}
+	}
+	return isValid;
 }
 
 bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout)
@@ -40,7 +83,7 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout)
 		cleanSpaces(line);
 		puzzle.size = processFirstLine(line);
 
-		for (int i = 0; i < puzzle.size; i++)
+		for (auto i = 0; i < puzzle.size; i++)
 		{
 			// missing elements
 			if (!getline(fin, line))
@@ -49,14 +92,13 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout)
 			}
 			this->processLine(line, wrong_ids, badFormatLines, puzzle.size, puzzle.elements);
 		}
-		getMissingElements(puzzle, missing_elements);
 
-		return true;
+		return checkIfValidAndReportError(puzzle, fout, missing_elements, wrong_ids, badFormatLines);
 	}
 	catch (exception ex)
 	{
-		fout << "Failed to parse input file - with exception:";
-		cout << ex.what();
+		fout << "Failed to parse input file - with exception:" << endl;
+		cout << ex.what() << endl;
 		return false;
 	}
 }
@@ -90,11 +132,14 @@ void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<stri
 			wrong_ids.push_back(id);
 			return;
 		}
-		int left = stoi(delimited[1]);
-		int top = stoi(delimited[2]);
-		int right = stoi(delimited[3]);
-		int bottom = stoi(delimited[4]);
-
+		int left = parseEdge(delimited[1]);
+		int top = parseEdge(delimited[2]);
+		int right = parseEdge(delimited[3]);
+		int bottom = parseEdge(delimited[4]);
+		if (delimited.size() > 5)
+		{
+			throw exception("more than 4 edges");
+		}
 		Element el(id, left, top, right, bottom);
 		elements.push_back(el);
 	}

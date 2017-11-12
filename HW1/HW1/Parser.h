@@ -16,6 +16,8 @@ class Parser
 {
 public:
 	void getMissingElements(const Puzzle& puzzle, vector<int>& missingElements);
+	bool checkIfValidAndReportError(const Puzzle& puzzle, ofstream& fout, vector<int>& missing_elements,
+		 vector<int>& wrong_ids, vector<string>& badFormatLines);
 	bool parse(ifstream& fin, Puzzle& puzzle, ofstream& fout);
 	
 	int processFirstLine(const string& line);
