@@ -6,5 +6,6 @@ class  Puzzle
 {
 public:
 	list<Element> elements;
+	list<Element>::iterator it;
 	unsigned int size;
 };
