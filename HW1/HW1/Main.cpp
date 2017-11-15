@@ -20,12 +20,13 @@ int main(int argc, char* argv[])
 	Puzzle puzzle;
 	if (!parser.parse(fin, puzzle, fout))
 	{
+		
 		fin.close();
 		fout.close();
 		return 0;
 	}
 
-	cout << puzzle.elements[1].left;
+	cout << "2nd element left: " << puzzle.elements[1].left << endl;
 	fin.close();
 	fout.close();
 }
