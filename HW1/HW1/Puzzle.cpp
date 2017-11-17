@@ -2,6 +2,7 @@
 
 #include "Puzzle.h"
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 string corner_to_string(Corner corner)
@@ -51,15 +52,14 @@ vector<Corner> Puzzle::find_missing_corners()
 			Corner corner = Corner(i);
 			missing_corners.push_back(corner);
 			ostringstream oss;
-			 oss << "Cannot solve puzzle: missing corner element: " + corner_to_string(corner);
-			 fout << oss.str() << endl;
-			 is_valid = false;
+			oss << "Cannot solve puzzle: missing corner element: " + corner_to_string(corner);
+			m_fout << oss.str() << endl;
 		}
 	}
 	return missing_corners;
 }
 
-bool Puzzle::validate_sum_of_edges(ofstream& fout)
+bool Puzzle::validate_sum_of_edges()
 {
 	int sum = 0;
 	for (Element element : this->elements)
@@ -73,7 +73,7 @@ bool Puzzle::validate_sum_of_edges(ofstream& fout)
 	{
 		ostringstream oss;
 		oss << "Cannot solve puzzle: sum of edges is not zero";
-		fout << oss.str() << endl;
+		m_fout << oss.str() << endl;
 	}
 	return sum == 0;
 }
@@ -92,7 +92,7 @@ void Puzzle::solve()
 
 	for (auto row_col_pair : valid_dimentions)
 	{
-		vector<Element**> matrices = create_all_permutations_of_dimention(row_col_pair);
+		vector<vector<vector<Element>>> matrices = create_all_permutations_of_dimention(row_col_pair);
 		for (auto matrix : matrices)
 		{
 			if (verify_matrix(matrix, row_col_pair))
@@ -101,5 +101,118 @@ void Puzzle::solve()
 			}
 		}
 	}
-	this->fout << "cannot solve";
+	this->m_fout << "cannot solve";
+}
+
+vector<pair<int, int>> Puzzle::size_to_matrices()
+{
+	vector<pair<int, int>> ret;
+	for (int i = 1; i <= size; i++)
+	{
+		if (size % i == 0)
+		{
+			ret.push_back(pair<int, int>(i, size / i));
+		}
+	}
+	return ret;
+}
+
+int Puzzle::get_straight_edges_count()
+{
+	int cnt = 0;
+	for (Element element : this->elements)
+	{
+		cnt += element.left == 0 ? 1 : 0;
+		cnt += element.top == 0 ? 1 : 0;
+		cnt += element.right == 0 ? 1 : 0;
+		cnt += element.bottom == 0 ? 1 : 0;
+	}
+	return cnt;
+}
+
+vector<pair<int, int>> Puzzle::get_valid_dimentions(vector<pair<int, int>> dimentions)
+{
+	vector<pair<int, int>> valid_dimentions;
+	int straight_edges_count = get_straight_edges_count();
+	for (auto dimention : dimentions)
+	{
+		if (2 * (dimention.first + dimention.second) <= straight_edges_count)
+		{
+			valid_dimentions.push_back(dimention);
+		}
+	}
+	if (valid_dimentions.empty())
+	{
+		ostringstream oss;
+		oss << "Cannot solve puzzle: wrong number of straight edges";
+		m_fout << oss.str() << endl;
+	}
+	return valid_dimentions;
+}
+
+vector<vector<vector<Element>>> Puzzle::create_all_permutations_of_dimention(pair<int, int> dimentions)
+{
+	vector<Element> copy = elements;
+	vector<vector<vector<Element>>> ret;
+	do
+	{
+		vector<vector<Element>> mat = vector_to_mat(copy, dimentions);
+		ret.push_back(mat);
+	}
+	while (next_permutation(copy.begin(), copy.end()));
+	return ret;
+}
+
+vector<vector<Element>> Puzzle::vector_to_mat(vector<Element> copy, pair<int, int> dimentions)
+{
+	int vectorIndex = 0;
+	vector<vector<Element>> ret;
+	for (int row = 0; row < int(dimentions.first); row++)
+	{
+		vector<Element> vec;
+		ret.push_back(vec);
+		for (int col = 0; col < int(dimentions.second); col++)
+		{
+			ret[row].push_back(copy[vectorIndex]);
+			vectorIndex++;
+		}
+	}
+	return ret;
+}
+
+Element Puzzle::getElement(const vector<vector<Element>> mat, int r, int c)
+{
+	if (r < 0 || c < 0 || r >= int(mat.size()) || c >= int(mat[r].size()))
+	{
+		return Element(0, 0, 0, 0, 0);
+	}
+	return mat[r][c];
+}
+
+bool Puzzle::verify_matrix(vector<vector<Element>> mat, pair<int, int> dimention)
+{
+	for (int r = 0; r < int(mat.size()); r++)
+	{
+		for (int c = 0; c < int(mat[r].size()); c++)
+		{
+			auto elem = mat[r][c];
+			if (getElement(mat, r - 1, c).bottom + elem.top != 0)
+			{
+				return false;
+			}
+			if (getElement(mat, r + 1 , c).top + elem.bottom != 0)
+			{
+				return false;
+			}
+			if (getElement(mat, r, c -1).right + elem.left != 0)
+			{
+				return false;
+			}
+			if (getElement(mat, r , c+1).left + elem.right != 0)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }

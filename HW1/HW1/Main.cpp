@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 
 	ofstream fout("Output.txt", ofstream::out);
 	Parser parser;
-	Puzzle puzzle;
+	Puzzle puzzle(fout);
 	if (!parser.parse(fin, puzzle, fout))
 	{
 		fin.close();
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	puzzle.validate(fout);
+	puzzle.solve();
 	fin.close();
 	fout.close();
 	return 0;
