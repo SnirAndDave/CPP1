@@ -18,14 +18,16 @@ enum Corner
 class Puzzle
 {
 public:
-	bool validate();
 	void solve();
 	vector<Element> elements;
 	unsigned int size;
 private:
-
-	bool validate_corner_elements();
-	bool validate_sum_of_edges(ofstream& fout);
+	vector<pair<int, int>> get_valid_dimentions(vector<pair<int, int>> dimentions); // straight edges
+	vector<pair<int,int>> size_to_matrices();
+	vector<Element**> create_all_permutations_of_dimention(pair<int,int> dimentions);
+	bool verify_matrix(Element** mat, pair<int, int> dimention);
+	vector<Corner> find_missing_corners();
+	bool validate_sum_of_edges();
 	ofstream m_out_file;
 	ofstream& fout;
 };
