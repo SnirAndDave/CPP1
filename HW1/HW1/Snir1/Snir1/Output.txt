@@ -1,1 +1,1 @@
-Puzzle ID <2> has wrong data: 2 0 0 1 -a
+Cannot solve puzzle: missing corner element: TRCannot solve puzzle: missing corner element: BLCannot solve puzzle: missing corner element: BR

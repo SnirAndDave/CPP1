@@ -5,6 +5,6 @@ Element::Element(int id, int left, int top, int right, int down)
 	left(left),
 	top(top),
 	right(right),
-	down(down)
+	bottom(down)
 {
 }

@@ -10,6 +10,6 @@ public:
 	int left;
 	int top;
 	int right;
-	int down;
+	int bottom;
 };
 #endif

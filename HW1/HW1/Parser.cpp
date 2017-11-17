@@ -47,7 +47,7 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 	if (!wrong_ids.empty())
 	{
 		std::ostringstream oss;
-		oss << "Puzzle of size " << puzzle.size << " cannot have the following IDs:";
+		oss << "Puzzle of size " << puzzle.size << " cannot have the following IDs: ";
 		is_valid = false;
 
 		get_ids_with_comma_delimiter(wrong_ids, oss);
