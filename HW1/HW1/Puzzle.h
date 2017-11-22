@@ -25,6 +25,7 @@ public:
 		size = 0;
 	}
 
+	void print_solution(const vector<vector<Element>>& vector, const pair<int, int>& pair);
 	void solve();
 	vector<Element> elements;
 	int size;

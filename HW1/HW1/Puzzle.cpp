@@ -21,6 +21,7 @@ string corner_to_string(Corner corner)
 	return {};
 }
 
+
 vector<Corner> Puzzle::find_missing_corners()
 {
 	bool found_corners[4] = {false, false, false, false};
@@ -78,6 +79,18 @@ bool Puzzle::validate_sum_of_edges()
 	return sum == 0;
 }
 
+void Puzzle::print_solution(const vector<vector<Element>>& vector, const pair<int, int>& pair)
+{
+	for (int r = 0; r < int(vector.size()); r++)
+	{
+		for (int c = 0; c < int(vector[r].size()); c++)
+		{
+			this->m_fout << vector[r][c].id << " ";
+		}
+		m_fout << endl;
+	}
+}
+
 void Puzzle::solve()
 {
 	vector<pair<int, int>> dimentions = size_to_matrices();
@@ -97,6 +110,7 @@ void Puzzle::solve()
 		{
 			if (verify_matrix(matrix, row_col_pair))
 			{
+				print_solution(matrix, row_col_pair);
 				return;
 			}
 		}
