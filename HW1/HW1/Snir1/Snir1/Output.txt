@@ -1,1 +1,0 @@
-Cannot solve puzzle: missing corner element: TRCannot solve puzzle: missing corner element: BLCannot solve puzzle: missing corner element: BR

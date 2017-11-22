@@ -3,7 +3,7 @@
 
 int main(int argc, char* argv[])
 {
-	if (argc != 2)
+	if (argc != 3)
 	{
 		cout << "Error: 1 argmunt must be provided";
 		return 0;
@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 		return false;
 	}
 
-	ofstream fout("Output.txt", ofstream::out);
+	ofstream fout(argv[2], ofstream::out);
 	Parser parser;
 	Puzzle puzzle(fout);
 	if (!parser.parse(fin, puzzle, fout))
