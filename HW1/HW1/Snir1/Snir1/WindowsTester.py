@@ -104,15 +104,14 @@ print("make:")
 #p1.wait()
 print("start:")
 for x in range(1000):
-    try:
-        puzzle = set_puzzle()
-    except:
-        continue
+    puzzle = set_puzzle()
     export_puzzle(puzzle)
     p = Popen(['../Debug/Snir1.exe', 'a', 'b'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, err = p.communicate()
+    print(err)
     check_output_file(puzzle)
     print(x)
+
 
 
 
