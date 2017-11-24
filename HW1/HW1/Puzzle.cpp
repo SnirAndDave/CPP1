@@ -95,6 +95,7 @@ void Puzzle::print_solution(const vector<vector<Element>>& vector)
 		}
 		m_fout << endl;
 	}
+	bug
 }
 
 vector<pair<int, int>> Puzzle::size_to_matrices()
