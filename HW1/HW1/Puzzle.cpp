@@ -79,53 +79,39 @@ bool Puzzle::validate_sum_of_edges()
 	return sum == 0;
 }
 
-void Puzzle::print_solution(const vector<vector<Element>>& vector, const pair<int, int>& pair)
+void Puzzle::print_solution(const vector<vector<Element>>& vector)
 {
-	for (int r = 0; r < int(vector.size()); r++)
+	int rsize = vector.size();
+	for (int r = 0; r < rsize; r++)
 	{
-		for (int c = 0; c < int(vector[r].size()); c++)
+		int csize = vector[r].size();
+		for (int c = 0; c < csize; c++)
 		{
-			this->m_fout << vector[r][c].id << " ";
+			this->m_fout << vector[r][c].id;
+			if (c < csize - 1)
+			{
+				this->m_fout << " ";
+			}
 		}
 		m_fout << endl;
 	}
 }
 
-void Puzzle::solve()
-{
-	vector<pair<int, int>> dimentions = size_to_matrices();
-	vector<pair<int, int>> valid_dimentions = get_valid_dimentions(dimentions);
-	vector<Corner> missing_corners = find_missing_corners();
-	bool is_sum_zero = validate_sum_of_edges();
-
-	if (!is_sum_zero || !missing_corners.empty() || valid_dimentions.empty())
-	{
-		return;
-	}
-
-	for (auto row_col_pair : valid_dimentions)
-	{
-		vector<vector<vector<Element>>> matrices = create_all_permutations_of_dimention(row_col_pair);
-		for (auto matrix : matrices)
-		{
-			if (verify_matrix(matrix, row_col_pair))
-			{
-				print_solution(matrix, row_col_pair);
-				return;
-			}
-		}
-	}
-	this->m_fout << "cannot solve";
-}
 
 vector<pair<int, int>> Puzzle::size_to_matrices()
 {
 	vector<pair<int, int>> ret;
+	vector<int> used;
 	for (int i = 1; i <= size; i++)
 	{
 		if (size % i == 0)
 		{
-			ret.push_back(pair<int, int>(i, size / i));
+			if (find(used.begin(), used.end(), i) == used.end()) //avoid doubles
+			{
+				ret.push_back(pair<int, int>(i, size / i));
+				used.push_back(i);
+				used.push_back(size / i);
+			}
 		}
 	}
 	return ret;
@@ -167,6 +153,7 @@ vector<pair<int, int>> Puzzle::get_valid_dimentions(vector<pair<int, int>> dimen
 vector<vector<vector<Element>>> Puzzle::create_all_permutations_of_dimention(pair<int, int> dimentions)
 {
 	vector<Element> copy = elements;
+	sort(copy.begin(), copy.end());
 	vector<vector<vector<Element>>> ret;
 	do
 	{
@@ -203,7 +190,7 @@ Element Puzzle::getElement(const vector<vector<Element>> mat, int r, int c)
 	return mat[r][c];
 }
 
-bool Puzzle::verify_matrix(vector<vector<Element>> mat, pair<int, int> dimention)
+bool Puzzle::verify_matrix(vector<vector<Element>> mat)
 {
 	for (int r = 0; r < int(mat.size()); r++)
 	{
@@ -214,19 +201,46 @@ bool Puzzle::verify_matrix(vector<vector<Element>> mat, pair<int, int> dimention
 			{
 				return false;
 			}
-			if (getElement(mat, r + 1 , c).top + elem.bottom != 0)
+			if (getElement(mat, r + 1, c).top + elem.bottom != 0)
 			{
 				return false;
 			}
-			if (getElement(mat, r, c -1).right + elem.left != 0)
+			if (getElement(mat, r, c - 1).right + elem.left != 0)
 			{
 				return false;
 			}
-			if (getElement(mat, r , c+1).left + elem.right != 0)
+			if (getElement(mat, r, c + 1).left + elem.right != 0)
 			{
 				return false;
 			}
 		}
 	}
 	return true;
+}
+
+void Puzzle::solve()
+{
+	vector<pair<int, int>> dimentions = size_to_matrices();
+	vector<pair<int, int>> valid_dimentions = get_valid_dimentions(dimentions);
+	vector<Corner> missing_corners = find_missing_corners();
+	bool is_sum_zero = validate_sum_of_edges();
+
+	if (!is_sum_zero || !missing_corners.empty() || valid_dimentions.empty())
+	{
+		return;
+	}
+
+	for (auto row_col_pair : valid_dimentions)
+	{
+		vector<vector<vector<Element>>> matrices = create_all_permutations_of_dimention(row_col_pair);
+		for (auto matrix : matrices)
+		{
+			if (verify_matrix(matrix))
+			{
+				print_solution(matrix);
+				return;
+			}
+		}
+	}
+	this->m_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
 }

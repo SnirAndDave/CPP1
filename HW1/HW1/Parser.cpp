@@ -87,7 +87,6 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout)
 		getline(fin, line);
 		clean_spaces(line);
 		puzzle.size = process_first_line(line);
-		cout << "size = " << puzzle.size << endl;
 		for (int i = 0; i < puzzle.size; i++)
 		{
 			// missing elements
@@ -97,7 +96,6 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout)
 			}
 			this->processLine(line, wrong_ids, bad_format_lines, puzzle.size, puzzle.elements);
 		}
-		cout << "done reading lines" << endl;
 
 		return check_if_valid_and_report_error(puzzle, fout, missing_elements, wrong_ids, bad_format_lines);
 	}
@@ -126,7 +124,8 @@ int Parser::parse_edge(string edge)
 	return parsed;
 }
 
-void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines, int elements_count,
+void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
+                         int elements_count,
                          vector<Element>& elements)
 {
 	try

@@ -36,7 +36,8 @@ private:
 	vector<vector<vector<Element>>> create_all_permutations_of_dimention(pair<int, int> dimentions);
 	vector<vector<Element>> vector_to_mat(vector<Element> copy, pair<int, int> dimentions);
 	Element getElement(const vector<vector<Element>> mat, int i, int r);
-	bool verify_matrix(vector<vector<Element>> mat, pair<int, int> dimention);
+	bool verify_matrix(vector<vector<Element>> mat);
+	void Puzzle::print_solution(const vector<vector<Element>>& vector);
 	vector<Corner> find_missing_corners();
 	bool validate_sum_of_edges();
 	ofstream& m_fout;
