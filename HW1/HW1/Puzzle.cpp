@@ -97,21 +97,14 @@ void Puzzle::print_solution(const vector<vector<Element>>& vector)
 	}
 }
 
-
 vector<pair<int, int>> Puzzle::size_to_matrices()
 {
 	vector<pair<int, int>> ret;
-	vector<int> used;
 	for (int i = 1; i <= size; i++)
 	{
 		if (size % i == 0)
 		{
-			if (find(used.begin(), used.end(), i) == used.end()) //avoid doubles
-			{
-				ret.push_back(pair<int, int>(i, size / i));
-				used.push_back(i);
-				used.push_back(size / i);
-			}
+			ret.push_back(pair<int, int>(i, size / i));
 		}
 	}
 	return ret;
@@ -232,15 +225,17 @@ void Puzzle::solve()
 
 	for (auto row_col_pair : valid_dimentions)
 	{
-		vector<vector<vector<Element>>> matrices = create_all_permutations_of_dimention(row_col_pair);
-		for (auto matrix : matrices)
+		vector<Element> copy = elements;
+		sort(copy.begin(), copy.end());
+		do
 		{
-			if (verify_matrix(matrix))
+			vector<vector<Element>> mat = vector_to_mat(copy, row_col_pair);
+			if (verify_matrix(mat))
 			{
-				print_solution(matrix);
+				print_solution(mat);
 				return;
 			}
-		}
+		} while (next_permutation(copy.begin(), copy.end()));
 	}
 	this->m_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
 }
