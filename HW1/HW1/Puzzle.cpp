@@ -209,6 +209,50 @@ bool Puzzle::verify_matrix(vector<vector<Element>> mat)
 	return true;
 }
 
+bool Puzzle::rec_solve(int r, int c, pair<int, int>& dimentions, vector<vector<Element>>& mat,
+                       vector<Element> remaining_elements)
+{
+	if (remaining_elements.empty() || r == dimentions.first)
+	{
+		return true;
+	}
+	for (Element remaining_element : remaining_elements)
+	{
+		if (!can_be_placed(r, c, dimentions, mat, remaining_element))
+		{
+			continue;
+		}
+		mat[r][c] = remaining_element;
+		vector<Element> remaining_elements_copy = remaining_elements;
+		remaining_elements_copy.erase(
+			remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element),
+			remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
+		int next_c = (c + 1) % dimentions.second; // end of line
+		int next_r = next_c == 0 ? r + 1 : r;
+		if (rec_solve(next_r, next_c, dimentions, mat, remaining_elements_copy))
+		{
+			return true;
+		}
+		mat[r][c] = Element();
+	}
+	return false;
+}
+
+vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimentions)
+{
+	vector<vector<Element>> ret;
+	for (int r = 0; r < dimentions.first; r++)
+	{
+		vector<Element> col;
+		for (int c = 0; c < dimentions.second; c++)
+		{
+			col.push_back(Element());
+		}
+		ret.push_back(col);
+	}
+	return ret;
+}
+
 void Puzzle::solve()
 {
 	vector<pair<int, int>> dimentions = size_to_matrices();
@@ -221,20 +265,37 @@ void Puzzle::solve()
 		return;
 	}
 
-	for (auto row_col_pair : valid_dimentions)
+	for (pair<int, int> row_col_pair : valid_dimentions)
 	{
 		vector<Element> copy = elements;
-		sort(copy.begin(), copy.end());
-		do
+		vector<vector<Element>> mat = create_empty_mat(row_col_pair);
+		if (rec_solve(0, 0, row_col_pair, mat, copy))
 		{
-			vector<vector<Element>> mat = vector_to_mat(copy, row_col_pair);
-			if (verify_matrix(mat))
-			{
-				print_solution(mat);
-				return;
-			}
+			print_solution(mat);
+			return;
 		}
-		while (next_permutation(copy.begin(), copy.end()));
 	}
 	this->m_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
+}
+
+bool Puzzle::can_be_placed(int r, int c, const pair<int, int>& dimentions, const vector<vector<Element>>& mat,
+                           const Element& element)
+{
+	if (getElement(mat, r - 1, c).bottom + element.top != 0)
+	{
+		return false;
+	}
+	if (getElement(mat, r, c - 1).right + element.left != 0)
+	{
+		return false;
+	}
+	if (r == dimentions.first && element.bottom != 0)
+	{
+		return false;
+	}
+	if (c == dimentions.second && element.right != 0)
+	{
+		return false;
+	}
+	return true;
 }
