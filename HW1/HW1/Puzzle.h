@@ -23,8 +23,10 @@ public:
 		size = 0;
 	}
 
-	void print_solution(const vector<vector<Element>>& vector, const pair<int, int>& pair);
+	void print_solution(const vector<vector<Element>>& vector);
+	vector<vector<Element>> create_empty_mat(const pair<int, int>& pair);
 	void solve();
+	bool can_be_placed(int i, int c, const pair<int, int>& pair, const vector<vector<Element>>& mat, const Element& element);
 	vector<Element> elements;
 	int size;
 private:
@@ -35,7 +37,8 @@ private:
 	vector<vector<Element>> vector_to_mat(vector<Element> copy, pair<int, int> dimentions);
 	Element getElement(const vector<vector<Element>> mat, int i, int r);
 	bool verify_matrix(vector<vector<Element>> mat);
-	void print_solution(const vector<vector<Element>>& vector);
+	bool rec_solve(int r, int c, pair<int, int>& dimentions, vector<vector<Element>>& mat,
+	               vector<Element> remaining_elements);
 	vector<Corner> find_missing_corners();
 	bool validate_sum_of_edges();
 	ofstream& m_fout;

@@ -2,9 +2,18 @@
 
 Element::Element(int id, int left, int top, int right, int down)
 	: id(id),
-	left(left),
-	top(top),
-	right(right),
-	bottom(down)
+	  left(left),
+	  top(top),
+	  right(right),
+	  bottom(down)
+{
+}
+
+Element::Element()
+	: id(),
+	  left(),
+	  top(),
+	  right(),
+	  bottom()
 {
 }
