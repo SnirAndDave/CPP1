@@ -81,10 +81,10 @@ bool Puzzle::validate_sum_of_edges()
 
 void Puzzle::print_solution(const vector<vector<Element>>& vector)
 {
-	int rsize = vector.size();
+	std::size_t rsize = vector.size();
 	for (int r = 0; r < rsize; r++)
 	{
-		int csize = vector[r].size();
+		std::size_t csize = vector[r].size();
 		for (int c = 0; c < csize; c++)
 		{
 			this->m_fout << vector[r][c].id;

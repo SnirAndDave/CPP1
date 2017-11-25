@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "Parser.h"
 #include <iterator>
+#include <ctype.h>
 
 using namespace std;
 
@@ -30,7 +31,8 @@ void Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_ele
 }
 
 bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fout, vector<int>& missing_elements,
-                                             vector<int>& wrong_ids, vector<string>& bad_format_lines)
+                                             vector<int>& wrong_ids, vector<string>& bad_format_lines,
+                                             vector<string>& bad_format_ids)
 {
 	bool is_valid = true;
 	get_missing_elements(puzzle, missing_elements);
@@ -60,8 +62,23 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 		{
 			vector<string> delimited = split(line, ' ');
 			int id = stoi(delimited[0]);
-			fout << "Puzzle ID " << id << " has wrong data: " << line;
+			fout << "Puzzle ID " << id << " has wrong data: " << line << endl;
 		}
+	}
+	if (!bad_format_ids.empty())
+	{
+		is_valid = false;
+		ostringstream oss;
+		oss << "The following element(s) doesn't have a valid ID: ";
+
+		string last_id = bad_format_ids.back();
+		bad_format_ids.pop_back();
+		for (string id : bad_format_ids)
+		{
+			oss << id << ", ";
+		}
+		oss << last_id;
+		fout << oss.str() << endl;
 	}
 	return is_valid;
 }
@@ -81,62 +98,93 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout)
 	vector<int> missing_elements;
 	vector<int> wrong_ids;
 	vector<string> bad_format_lines;
+	vector<string> bad_format_ids;
 
 	try
 	{
 		getline(fin, line);
 		clean_spaces(line);
 		puzzle.size = process_first_line(line);
-		for (int i = 0; i < puzzle.size; i++)
+		while (getline(fin, line))
 		{
-			// missing elements
-			if (!getline(fin, line))
-			{
-				break;
-			}
-			this->processLine(line, wrong_ids, bad_format_lines, puzzle.size, puzzle.elements);
+			this->processLine(line, wrong_ids, bad_format_lines, bad_format_ids, puzzle.size, puzzle.elements);
 		}
 
-		return check_if_valid_and_report_error(puzzle, fout, missing_elements, wrong_ids, bad_format_lines);
+		return check_if_valid_and_report_error(puzzle, fout, missing_elements, wrong_ids, bad_format_lines, bad_format_ids);
 	}
 	catch (exception ex)
 	{
-		fout << "Failed to parse input file - with exception: " << ex.what() << endl;
-		cout << ex.what() << endl;
+		//	fout << "Failed to parse input file - with exception: " << ex.what() << endl;
+		fout << "" << ex.what() << endl;
+		//cout << ex.what() << endl;
 		return false;
 	}
 }
 
 int Parser::process_first_line(const string& line)
 {
-	auto delimited = split(line, '=');
-	// todo error handling 
-	return stoi(delimited.at(1));
+	vector<string> delimited = split(line, '=');
+	string num = delimited[1];
+	if (!is_digits(num))
+	{
+		throw exception("invalid number of elements");
+	}
+	return stoi(num);
 }
 
 int Parser::parse_edge(string edge)
 {
+	if (!is_digits_with_minus(edge))
+	{
+		throw exception("edge is not a number");
+	}
 	int parsed = stoi(edge);
 	if (parsed < -1 || parsed > 1)
 	{
-		throw exception("edge is not valid");
+		throw exception("edge is not valid number");
 	}
 	return parsed;
 }
 
+bool Parser::is_digits(const std::string& str)
+{
+	return std::all_of(str.begin(), str.end(), ::isdigit);
+}
+
+bool Parser::is_digits_with_minus(const std::string& str)
+{
+	if (str[0] == '-')
+	{
+		string str2 = str.substr(1, str.size());
+		return std::all_of(str2.begin(), str2.end(), ::isdigit);
+	}
+	return std::all_of(str.begin(), str.end(), ::isdigit);
+}
+
 void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
+                         vector<string>& bad_format_ids,
                          int elements_count,
                          vector<Element>& elements)
 {
+	vector<string> delimited = split(line, ' ');
+
+
+	if (!is_digits(delimited[0]))
+	{
+		bad_format_ids.push_back(delimited[0]);
+		return;
+	}
+
+	int id = stoi(delimited[0]);
+
+	if (id > elements_count || id <= 0)
+	{
+		wrong_ids.push_back(id);
+		return;
+	}
+
 	try
 	{
-		vector<string> delimited = split(line, ' ');
-		int id = stoi(delimited[0]);
-		if (id > elements_count || id < 0)
-		{
-			wrong_ids.push_back(id);
-			return;
-		}
 		int left = parse_edge(delimited[1]);
 		int top = parse_edge(delimited[2]);
 		int right = parse_edge(delimited[3]);
@@ -148,12 +196,14 @@ void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<stri
 	catch (exception ex)
 	{
 		bad_format_lines.push_back(line);
+		Element el(id, 0, 0, 0, 0);
+		elements.push_back(el);
 	}
 }
 
 void Parser::clean_spaces(string& str)
 {
-	string::iterator end_pos = remove(str.begin(), str.end(), ' ');
+	str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
 }
 
 //splits string s to a vector
