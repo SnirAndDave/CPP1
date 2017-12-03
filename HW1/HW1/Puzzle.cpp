@@ -27,21 +27,25 @@ vector<Corner> Puzzle::find_missing_corners()
 	vector<Corner> missing_corners;
 	for (Element element : this->elements)
 	{
-		if (element.top == 0 && element.left == 0)
+		for (int i = 0; i < 4; i++)
 		{
-			found_corners[TL] = true;
-		}
-		if (element.top == 0 && element.right == 0)
-		{
-			found_corners[TR] = true;
-		}
-		if (element.bottom == 0 && element.left == 0)
-		{
-			found_corners[BL] = true;
-		}
-		if (element.bottom == 0 && element.right == 0)
-		{
-			found_corners[BR] = true;
+			element.rotate_right();
+			if (element.top == 0 && element.left == 0)
+			{
+				found_corners[TL] = true;
+			}
+			if (element.top == 0 && element.right == 0)
+			{
+				found_corners[TR] = true;
+			}
+			if (element.bottom == 0 && element.left == 0)
+			{
+				found_corners[BL] = true;
+			}
+			if (element.bottom == 0 && element.right == 0)
+			{
+				found_corners[BR] = true;
+			}
 		}
 	}
 	for (int i = 0; i < 4; i++)
@@ -88,7 +92,7 @@ void Puzzle::print_solution(const vector<vector<Element>>& vector)
 			this->m_fout << vector[r][c].id;
 			if (vector[r][c].rotation() != 0)
 			{
-				this->m_fout << vector[r][c].rotation();
+				this->m_fout << " [" << vector[r][c].rotation() << "]";
 			}
 			if (c < csize - 1)
 			{
