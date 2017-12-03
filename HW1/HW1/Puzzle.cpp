@@ -86,6 +86,10 @@ void Puzzle::print_solution(const vector<vector<Element>>& vector)
 		for (std::size_t c = 0; c < csize; c++)
 		{
 			this->m_fout << vector[r][c].id;
+			if (vector[r][c].rotation() != 0)
+			{
+				this->m_fout << vector[r][c].rotation();
+			}
 			if (c < csize - 1)
 			{
 				this->m_fout << " ";
