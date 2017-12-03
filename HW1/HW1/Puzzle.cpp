@@ -23,25 +23,32 @@ string corner_to_string(Corner corner)
 vector<Corner> Puzzle::find_missing_corners()
 {
 	bool found_corners[4] = {false, false, false, false};
-
+	int iterations = is_rotation_enabled ? 4 : 1;
 	vector<Corner> missing_corners;
 	for (Element element : this->elements)
 	{
-		if (element.top == 0 && element.left == 0)
+		for (int i = 0; i < iterations; i++)
 		{
-			found_corners[TL] = true;
-		}
-		if (element.top == 0 && element.right == 0)
-		{
-			found_corners[TR] = true;
-		}
-		if (element.bottom == 0 && element.left == 0)
-		{
-			found_corners[BL] = true;
-		}
-		if (element.bottom == 0 && element.right == 0)
-		{
-			found_corners[BR] = true;
+			if (is_rotation_enabled)
+			{
+				element.rotate_right();
+			}
+			if (element.top == 0 && element.left == 0)
+			{
+				found_corners[TL] = true;
+			}
+			if (element.top == 0 && element.right == 0)
+			{
+				found_corners[TR] = true;
+			}
+			if (element.bottom == 0 && element.left == 0)
+			{
+				found_corners[BL] = true;
+			}
+			if (element.bottom == 0 && element.right == 0)
+			{
+				found_corners[BR] = true;
+			}
 		}
 	}
 	for (int i = 0; i < 4; i++)
@@ -88,7 +95,7 @@ void Puzzle::print_solution(const vector<vector<Element>>& vector)
 			this->m_fout << vector[r][c].id;
 			if (vector[r][c].rotation() != 0)
 			{
-				this->m_fout << vector[r][c].rotation();
+				this->m_fout << " [" << vector[r][c].rotation() << "]";
 			}
 			if (c < csize - 1)
 			{
@@ -216,15 +223,20 @@ bool Puzzle::verify_matrix(vector<vector<Element>> mat)
 bool Puzzle::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
                        vector<Element> remaining_elements)
 {
+	int iterations = is_rotation_enabled ? 4 : 1;
+
 	if (remaining_elements.empty() || r == dimensions.first)
 	{
 		return true;
 	}
 	for (Element remaining_element : remaining_elements)
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < iterations; i++)
 		{
-			remaining_element.rotate_right();
+			if (is_rotation_enabled)
+			{
+				remaining_element.rotate_right();
+			}
 			if (!can_be_placed(r, c, dimensions, mat, remaining_element))
 			{
 				continue;
@@ -297,11 +309,11 @@ bool Puzzle::can_be_placed(int r, int c, const pair<int, int>& dimensions, const
 	{
 		return false;
 	}
-	if (r == dimensions.first && element.bottom != 0)
+	if (r == dimensions.first - 1 && element.bottom != 0)
 	{
 		return false;
 	}
-	if (c == dimensions.second && element.right != 0)
+	if (c == dimensions.second - 1 && element.right != 0)
 	{
 		return false;
 	}
