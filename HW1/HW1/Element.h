@@ -36,10 +36,14 @@ class Element {
 public:
 	Element(int id, int left, int top, int right, int down);
 	Element();
+	int rotation() const;
+	void rotate_right();
 	int id;
 	int left;
 	int top;
 	int right;
 	int bottom;
+private:
+	int rotation_;
 };
 #endif

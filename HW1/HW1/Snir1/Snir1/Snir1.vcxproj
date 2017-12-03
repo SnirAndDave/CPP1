@@ -120,7 +120,6 @@
     <ClInclude Include="..\..\Element.h" />
     <ClInclude Include="..\..\Parser.h" />
     <ClInclude Include="..\..\Puzzle.h" />
-    <ClInclude Include="dirent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

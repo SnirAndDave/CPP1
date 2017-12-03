@@ -17,8 +17,8 @@ enum Corner
 class Puzzle
 {
 public:
-	Puzzle(ofstream& fout)
-		: m_fout(fout)
+	Puzzle(ofstream& fout, bool rotation)
+		: m_fout(fout), is_rotation_enabled(rotation)
 	{
 		size = 0;
 	}
@@ -29,6 +29,7 @@ public:
 	bool can_be_placed(int i, int c, const pair<int, int>& pair, const vector<vector<Element>>& mat, const Element& element);
 	vector<Element> elements;
 	int size;
+	bool is_rotation_enabled;
 private:
 	vector<pair<int, int>> size_to_matrices();
 	int get_straight_edges_count();
