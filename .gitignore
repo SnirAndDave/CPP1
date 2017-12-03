@@ -292,3 +292,11 @@ __pycache__/
 /HW1/HW1/Snir1/Snir1/tester (1).py
 /HW1/HW1/Snir1/Snir1/bb
 /HW1/HW1/Snir1/Snir1/aa
+/HW1/HW1
+/David5/David5/error_tests
+/David5/David5/Tests
+*.vcxproj
+*.filters
+/David5/David5/input.txt
+/David5/David5/output.txt
+/David5/David5.sln

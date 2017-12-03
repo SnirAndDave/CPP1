@@ -125,49 +125,49 @@ int Puzzle::get_straight_edges_count()
 	return cnt;
 }
 
-vector<pair<int, int>> Puzzle::get_valid_dimentions(vector<pair<int, int>> dimentions)
+vector<pair<int, int>> Puzzle::get_valid_dimensions(vector<pair<int, int>> dimensions)
 {
-	vector<pair<int, int>> valid_dimentions;
+	vector<pair<int, int>> valid_dimensions;
 	int straight_edges_count = get_straight_edges_count();
-	for (auto dimention : dimentions)
+	for (auto dimension : dimensions)
 	{
-		if (2 * (dimention.first + dimention.second) <= straight_edges_count)
+		if (2 * (dimension.first + dimension.second) <= straight_edges_count)
 		{
-			valid_dimentions.push_back(dimention);
+			valid_dimensions.push_back(dimension);
 		}
 	}
-	if (valid_dimentions.empty())
+	if (valid_dimensions.empty())
 	{
 		ostringstream oss;
 		oss << "Cannot solve puzzle: wrong number of straight edges";
 		m_fout << oss.str() << endl;
 	}
-	return valid_dimentions;
+	return valid_dimensions;
 }
 
-vector<vector<vector<Element>>> Puzzle::create_all_permutations_of_dimention(pair<int, int> dimentions)
+vector<vector<vector<Element>>> Puzzle::create_all_permutations_of_dimension(pair<int, int> dimensions)
 {
 	vector<Element> copy = elements;
 	sort(copy.begin(), copy.end());
 	vector<vector<vector<Element>>> ret;
 	do
 	{
-		vector<vector<Element>> mat = vector_to_mat(copy, dimentions);
+		vector<vector<Element>> mat = vector_to_mat(copy, dimensions);
 		ret.push_back(mat);
 	}
 	while (next_permutation(copy.begin(), copy.end()));
 	return ret;
 }
 
-vector<vector<Element>> Puzzle::vector_to_mat(vector<Element> copy, pair<int, int> dimentions)
+vector<vector<Element>> Puzzle::vector_to_mat(vector<Element> copy, pair<int, int> dimensions)
 {
 	int vectorIndex = 0;
 	vector<vector<Element>> ret;
-	for (int row = 0; row < int(dimentions.first); row++)
+	for (int row = 0; row < int(dimensions.first); row++)
 	{
 		vector<Element> vec;
 		ret.push_back(vec);
-		for (int col = 0; col < int(dimentions.second); col++)
+		for (int col = 0; col < int(dimensions.second); col++)
 		{
 			ret[row].push_back(copy[vectorIndex]);
 			vectorIndex++;
@@ -213,42 +213,46 @@ bool Puzzle::verify_matrix(vector<vector<Element>> mat)
 	return true;
 }
 
-bool Puzzle::rec_solve(int r, int c, pair<int, int>& dimentions, vector<vector<Element>>& mat,
+bool Puzzle::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
                        vector<Element> remaining_elements)
 {
-	if (remaining_elements.empty() || r == dimentions.first)
+	if (remaining_elements.empty() || r == dimensions.first)
 	{
 		return true;
 	}
 	for (Element remaining_element : remaining_elements)
 	{
-		if (!can_be_placed(r, c, dimentions, mat, remaining_element))
+		for (int i = 0; i < 4; i++)
 		{
-			continue;
+			remaining_element.rotate_right();
+			if (!can_be_placed(r, c, dimensions, mat, remaining_element))
+			{
+				continue;
+			}
+			mat[r][c] = remaining_element;
+			vector<Element> remaining_elements_copy = remaining_elements;
+			remaining_elements_copy.erase(
+				remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element),
+				remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
+			int next_c = (c + 1) % dimensions.second; // end of line
+			int next_r = next_c == 0 ? r + 1 : r;
+			if (rec_solve(next_r, next_c, dimensions, mat, remaining_elements_copy))
+			{
+				return true;
+			}
+			mat[r][c] = Element();
 		}
-		mat[r][c] = remaining_element;
-		vector<Element> remaining_elements_copy = remaining_elements;
-		remaining_elements_copy.erase(
-			remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element),
-			remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
-		int next_c = (c + 1) % dimentions.second; // end of line
-		int next_r = next_c == 0 ? r + 1 : r;
-		if (rec_solve(next_r, next_c, dimentions, mat, remaining_elements_copy))
-		{
-			return true;
-		}
-		mat[r][c] = Element();
 	}
 	return false;
 }
 
-vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimentions)
+vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimensions)
 {
 	vector<vector<Element>> ret;
-	for (int r = 0; r < dimentions.first; r++)
+	for (int r = 0; r < dimensions.first; r++)
 	{
 		vector<Element> col;
-		for (int c = 0; c < dimentions.second; c++)
+		for (int c = 0; c < dimensions.second; c++)
 		{
 			col.push_back(Element());
 		}
@@ -259,17 +263,17 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimention
 
 void Puzzle::solve()
 {
-	vector<pair<int, int>> dimentions = size_to_matrices();
-	vector<pair<int, int>> valid_dimentions = get_valid_dimentions(dimentions);
+	vector<pair<int, int>> dimensions = size_to_matrices();
+	vector<pair<int, int>> valid_dimensions = get_valid_dimensions(dimensions);
 	vector<Corner> missing_corners = find_missing_corners();
 	bool is_sum_zero = validate_sum_of_edges();
 
-	if (!is_sum_zero || !missing_corners.empty() || valid_dimentions.empty())
+	if (!is_sum_zero || !missing_corners.empty() || valid_dimensions.empty())
 	{
 		return;
 	}
 
-	for (pair<int, int> row_col_pair : valid_dimentions)
+	for (pair<int, int> row_col_pair : valid_dimensions)
 	{
 		vector<Element> copy = elements;
 		vector<vector<Element>> mat = create_empty_mat(row_col_pair);
@@ -282,7 +286,7 @@ void Puzzle::solve()
 	this->m_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
 }
 
-bool Puzzle::can_be_placed(int r, int c, const pair<int, int>& dimentions, const vector<vector<Element>>& mat,
+bool Puzzle::can_be_placed(int r, int c, const pair<int, int>& dimensions, const vector<vector<Element>>& mat,
                            const Element& element)
 {
 	if (getElement(mat, r - 1, c).bottom + element.top != 0)
@@ -293,11 +297,11 @@ bool Puzzle::can_be_placed(int r, int c, const pair<int, int>& dimentions, const
 	{
 		return false;
 	}
-	if (r == dimentions.first && element.bottom != 0)
+	if (r == dimensions.first && element.bottom != 0)
 	{
 		return false;
 	}
-	if (c == dimentions.second && element.right != 0)
+	if (c == dimensions.second && element.right != 0)
 	{
 		return false;
 	}
