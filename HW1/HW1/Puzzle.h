@@ -33,8 +33,8 @@ public:
 private:
 	vector<pair<int, int>> size_to_matrices();
 	int get_straight_edges_count();
-	vector<pair<int, int>> get_valid_dimentions(vector<pair<int, int>> dimentions); // straight edges
-	vector<vector<vector<Element>>> create_all_permutations_of_dimention(pair<int, int> dimentions);
+	vector<pair<int, int>> get_valid_dimensions(vector<pair<int, int>> dimentions); // straight edges
+	vector<vector<vector<Element>>> create_all_permutations_of_dimension(pair<int, int> dimentions);
 	vector<vector<Element>> vector_to_mat(vector<Element> copy, pair<int, int> dimentions);
 	Element getElement(const vector<vector<Element>> mat, int i, int r);
 	bool verify_matrix(vector<vector<Element>> mat);
