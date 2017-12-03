@@ -226,7 +226,6 @@ bool Puzzle::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<E
 		{
 			remaining_element.rotate_right();
 			if (!can_be_placed(r, c, dimensions, mat, remaining_element))
-			if (!can_be_placed(r, c, dimensions, mat, remaining_element))
 			{
 				continue;
 			}
