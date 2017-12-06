@@ -15,7 +15,7 @@ public:
 	virtual bool solve(pair<int, int>& dimentions, vector<std::vector<Element>>& puzzle,
 		std::vector<Element>& remaining_elements) = 0;
 protected:
-	virtual bool can_be_placed(int i, int c, const pair<int, int>& pair, const vector<vector<Element>>& mat, const Element& element);
+	virtual bool can_be_placed(int r, int c, const pair<int, int>& dimensions, const vector<vector<Element>>& mat, const Element& element);
 };
 
 #endif

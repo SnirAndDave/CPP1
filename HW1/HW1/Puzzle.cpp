@@ -5,6 +5,9 @@
 #include "BaseSolver.h"
 #include "RotationRecursiveSolver.h"
 #include "RecursiveSolver.h"
+#include "LeftRecursiveSolver.h"
+#include "RightRecursiveSolver.h"
+#include "BottomRecursiveSolver.h"
 
 using namespace std;
 
@@ -121,6 +124,13 @@ vector<pair<int, int>> Puzzle::size_to_matrices()
 			ret.push_back(pair<int, int>(i, size / i));
 		}
 	}
+	// sort by min dimention
+	sort(ret.begin(), ret.end(),[](const pair<int,int> & a, const pair<int,int> & b) -> bool
+	{
+		int min_a = min(a.first, a.second);
+		int min_b = min(b.first, b.second);
+		return min_a > min_b;
+	});
 	return ret;
 }
 
@@ -240,15 +250,41 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimension
 	}
 	return ret;
 }
- 
- unique_ptr<BaseSolver> Puzzle::choose_solver()
- {
- 	if(is_rotation_enabled)
- 	{
- 		return make_unique<RotationRecursiveSolver>();
- 	}
- 	return make_unique<RecursiveSolver>();
- }
+
+unique_ptr<BaseSolver> Puzzle::choose_solver()
+{
+	if (is_rotation_enabled)
+	{
+		return make_unique<RotationRecursiveSolver>();
+	}
+	int edges_count[4] = {0,0,0,0};
+	for (Element element : elements)
+	{
+		edges_count[0] += (element.left == 0 ? 1 : 0);
+		edges_count[1] += (element.top == 0 ? 1 : 0);
+		edges_count[2] += (element.right == 0 ? 1 : 0);
+		edges_count[3] += (element.bottom == 0 ? 1 : 0);
+	}
+	int min_edge_index = distance(edges_count, min_element(edges_count, edges_count + 4));
+	unique_ptr<BaseSolver> ret;
+	switch (min_edge_index)
+	{
+	case 0:
+		ret = make_unique<LeftRecursiveSolver>();
+		break;
+	case 1:
+		ret = make_unique<RecursiveSolver>();
+		break;
+	case 2:
+		ret = make_unique<RightRecursiveSolver>();
+		break;
+	default:
+		ret = make_unique<BottomRecursiveSolver>();
+		break;
+
+	}
+	return ret;
+}
 
 void Puzzle::solve()
 {
@@ -261,13 +297,13 @@ void Puzzle::solve()
 	{
 		return;
 	}
-	
+
 	unique_ptr<BaseSolver> solver = choose_solver();
 	for (pair<int, int> row_col_pair : valid_dimensions)
 	{
 		vector<Element> elements_copy = elements;
 		vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-		
+
 		if (solver->solve(row_col_pair, mat, elements_copy))
 		{
 			print_solution(mat);
@@ -276,4 +312,3 @@ void Puzzle::solve()
 	}
 	this->m_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
 }
-

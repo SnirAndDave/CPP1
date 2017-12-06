@@ -112,19 +112,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\BaseSolver.cpp" />
+    <ClCompile Include="..\..\BottomRecursiveSolver.cpp" />
     <ClCompile Include="..\..\Element.cpp" />
+    <ClCompile Include="..\..\LeftRecursiveSolver.cpp" />
     <ClCompile Include="..\..\Main.cpp" />
     <ClCompile Include="..\..\Parser.cpp" />
     <ClCompile Include="..\..\Puzzle.cpp" />
     <ClCompile Include="..\..\RecursiveSolver.cpp" />
+    <ClCompile Include="..\..\RightRecursiveSolver.cpp" />
     <ClCompile Include="..\..\RotationRecursiveSolver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\BaseSolver.h" />
+    <ClInclude Include="..\..\BottomRecursiveSolver.h" />
     <ClInclude Include="..\..\Element.h" />
+    <ClInclude Include="..\..\LeftRecursiveSolver.h" />
     <ClInclude Include="..\..\Parser.h" />
     <ClInclude Include="..\..\Puzzle.h" />
     <ClInclude Include="..\..\RecursiveSolver.h" />
+    <ClInclude Include="..\..\RightRecursiveSolver.h" />
     <ClInclude Include="..\..\RotationRecursiveSolver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
