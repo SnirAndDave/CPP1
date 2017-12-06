@@ -1,6 +1,11 @@
 #include "Puzzle.h"
 #include <sstream>
 #include <algorithm>
+#include <memory>
+#include "BaseSolver.h"
+#include "RotationRecursiveSolver.h"
+#include "RecursiveSolver.h"
+
 using namespace std;
 
 string corner_to_string(Corner corner)
@@ -183,7 +188,7 @@ vector<vector<Element>> Puzzle::vector_to_mat(vector<Element> copy, pair<int, in
 	return ret;
 }
 
-Element Puzzle::getElement(const vector<vector<Element>> mat, int r, int c)
+Element Puzzle::get_element(const vector<vector<Element>> mat, int r, int c)
 {
 	if (r < 0 || c < 0 || r >= int(mat.size()) || c >= int(mat[r].size()))
 	{
@@ -199,19 +204,19 @@ bool Puzzle::verify_matrix(vector<vector<Element>> mat)
 		for (int c = 0; c < int(mat[r].size()); c++)
 		{
 			auto elem = mat[r][c];
-			if (getElement(mat, r - 1, c).bottom + elem.top != 0)
+			if (get_element(mat, r - 1, c).bottom + elem.top != 0)
 			{
 				return false;
 			}
-			if (getElement(mat, r + 1, c).top + elem.bottom != 0)
+			if (get_element(mat, r + 1, c).top + elem.bottom != 0)
 			{
 				return false;
 			}
-			if (getElement(mat, r, c - 1).right + elem.left != 0)
+			if (get_element(mat, r, c - 1).right + elem.left != 0)
 			{
 				return false;
 			}
-			if (getElement(mat, r, c + 1).left + elem.right != 0)
+			if (get_element(mat, r, c + 1).left + elem.right != 0)
 			{
 				return false;
 			}
@@ -220,43 +225,6 @@ bool Puzzle::verify_matrix(vector<vector<Element>> mat)
 	return true;
 }
 
-bool Puzzle::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
-                       vector<Element> remaining_elements)
-{
-	int iterations = is_rotation_enabled ? 4 : 1;
-
-	if (remaining_elements.empty() || r == dimensions.first)
-	{
-		return true;
-	}
-	for (Element remaining_element : remaining_elements)
-	{
-		for (int i = 0; i < iterations; i++)
-		{
-			if (is_rotation_enabled)
-			{
-				remaining_element.rotate_right();
-			}
-			if (!can_be_placed(r, c, dimensions, mat, remaining_element))
-			{
-				continue;
-			}
-			mat[r][c] = remaining_element;
-			vector<Element> remaining_elements_copy = remaining_elements;
-			remaining_elements_copy.erase(
-				remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element),
-				remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
-			int next_c = (c + 1) % dimensions.second; // end of line
-			int next_r = next_c == 0 ? r + 1 : r;
-			if (rec_solve(next_r, next_c, dimensions, mat, remaining_elements_copy))
-			{
-				return true;
-			}
-			mat[r][c] = Element();
-		}
-	}
-	return false;
-}
 
 vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimensions)
 {
@@ -272,6 +240,15 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimension
 	}
 	return ret;
 }
+ 
+ unique_ptr<BaseSolver> Puzzle::choose_solver()
+ {
+ 	if(is_rotation_enabled)
+ 	{
+ 		return make_unique<RotationRecursiveSolver>();
+ 	}
+ 	return make_unique<RecursiveSolver>();
+ }
 
 void Puzzle::solve()
 {
@@ -284,12 +261,14 @@ void Puzzle::solve()
 	{
 		return;
 	}
-
+	
+	unique_ptr<BaseSolver> solver = choose_solver();
 	for (pair<int, int> row_col_pair : valid_dimensions)
 	{
-		vector<Element> copy = elements;
+		vector<Element> elements_copy = elements;
 		vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-		if (rec_solve(0, 0, row_col_pair, mat, copy))
+		
+		if (solver->solve(row_col_pair, mat, elements_copy))
 		{
 			print_solution(mat);
 			return;
@@ -298,24 +277,3 @@ void Puzzle::solve()
 	this->m_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
 }
 
-bool Puzzle::can_be_placed(int r, int c, const pair<int, int>& dimensions, const vector<vector<Element>>& mat,
-                           const Element& element)
-{
-	if (getElement(mat, r - 1, c).bottom + element.top != 0)
-	{
-		return false;
-	}
-	if (getElement(mat, r, c - 1).right + element.left != 0)
-	{
-		return false;
-	}
-	if (r == dimensions.first - 1 && element.bottom != 0)
-	{
-		return false;
-	}
-	if (c == dimensions.second - 1 && element.right != 0)
-	{
-		return false;
-	}
-	return true;
-}
