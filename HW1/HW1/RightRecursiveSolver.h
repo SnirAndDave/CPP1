@@ -2,6 +2,7 @@
 #ifndef __RIGHTRECURSIVESOLVER_H_INCLUDED__   
 #define __RIGHTRECURSIVESOLVER_H_INCLUDED__   
 #include "BaseSolver.h"
+#include "Puzzle.h"
 
 class RightRecursiveSolver :
 	public BaseSolver

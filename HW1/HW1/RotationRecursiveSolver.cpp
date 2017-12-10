@@ -1,5 +1,4 @@
 #include "RotationRecursiveSolver.h"
-
 #include <sstream>
 #include <algorithm>
 
@@ -14,13 +13,13 @@ RotationRecursiveSolver::~RotationRecursiveSolver()
 }
 
 bool RotationRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
-	vector<Element>& remaining_elements)
+                                    vector<Element>& remaining_elements)
 {
 	return rec_solve(0, 0, dimentions, puzzle, remaining_elements);
 }
 
 bool RotationRecursiveSolver::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
-	vector<Element>& remaining_elements)
+                                        vector<Element>& remaining_elements)
 {
 	int iterations = 4;
 

@@ -1,7 +1,6 @@
 #pragma once
 #ifndef __PUZZLE_H_INCLUDED__
 #define __PUZZLE_H_INCLUDED__
-#include "Element.h"
 #include <fstream>
 #include <vector>
 #include <memory>

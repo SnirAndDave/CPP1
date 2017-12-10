@@ -1,9 +1,8 @@
 #include "LeftRecursiveSolver.h"
-
 #include <sstream>
 #include <algorithm>
-#include "RecursiveSolver.h"
-#include "Puzzle.h"
+
+
 
 using namespace std;
 
@@ -19,36 +18,14 @@ LeftRecursiveSolver::~LeftRecursiveSolver()
 
 
 bool LeftRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
-	vector<Element>& remaining_elements)
+                                vector<Element>& remaining_elements)
 {
 	return rec_solve(0, 0, dimentions, puzzle, remaining_elements);
 }
 
-bool LeftRecursiveSolver::can_be_placed(int r, int c, const pair<int, int>& dimensions, const vector<vector<Element>>& mat,
-	const Element& element)
-{
-	if (Puzzle::get_element(mat, r - 1, c).bottom + element.top != 0)
-	{
-		return false;
-	}
-	if (Puzzle::get_element(mat, r, c - 1).right + element.left != 0)
-	{
-		return false;
-	}
-	if (r == dimensions.first - 1 && element.bottom != 0)
-	{
-		return false;
-	}
-	if (c == dimensions.second - 1 && element.right != 0)
-	{
-		return false;
-	}
-	return true;
-}
-
 
 bool LeftRecursiveSolver::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
-	vector<Element>& remaining_elements)
+                                    vector<Element>& remaining_elements)
 {
 	if (remaining_elements.empty() || c == dimensions.second)
 	{

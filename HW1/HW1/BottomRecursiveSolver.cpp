@@ -1,9 +1,7 @@
 #include "BottomRecursiveSolver.h"
-
 #include <sstream>
 #include <algorithm>
-#include "RecursiveSolver.h"
-#include "Puzzle.h"
+
 
 using namespace std;
 
