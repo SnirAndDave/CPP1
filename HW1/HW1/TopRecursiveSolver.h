@@ -3,12 +3,12 @@
 #define __RECURSIVESOLVER_H_INCLUDED__   
 #include "BaseSolver.h"
 
-class RecursiveSolver :
+class TopRecursiveSolver :
 	public BaseSolver
 {
 public:
-	RecursiveSolver();
-	~RecursiveSolver();
+	TopRecursiveSolver();
+	~TopRecursiveSolver();
 	bool solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
 		vector<Element>& remaining_elements) override;
 

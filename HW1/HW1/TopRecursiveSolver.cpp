@@ -1,29 +1,28 @@
-#include "RecursiveSolver.h"
-
+#include "TopRecursiveSolver.h"
 #include <sstream>
 #include <algorithm>
 
 using namespace std;
 
 
-RecursiveSolver::RecursiveSolver()
+TopRecursiveSolver::TopRecursiveSolver()
 {
 }
 
 
-RecursiveSolver::~RecursiveSolver()
+TopRecursiveSolver::~TopRecursiveSolver()
 {
 }
 
 
-bool RecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
+bool TopRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
 	vector<Element>& remaining_elements)
 {
 	return rec_solve(0, 0, dimentions, puzzle, remaining_elements);
 }
 
 
-bool RecursiveSolver::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
+bool TopRecursiveSolver::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
 	vector<Element>& remaining_elements)
 {
 	if (remaining_elements.empty() || r == dimensions.first)

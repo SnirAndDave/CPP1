@@ -2,6 +2,7 @@
 #ifndef __BottomRecursiveSolver_H_INCLUDED__   
 #define __BottomRecursiveSolver_H_INCLUDED__   
 #include "BaseSolver.h"
+#include "Puzzle.h"
 
 class BottomRecursiveSolver :
 	public BaseSolver

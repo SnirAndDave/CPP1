@@ -4,7 +4,7 @@
 #include <memory>
 #include "BaseSolver.h"
 #include "RotationRecursiveSolver.h"
-#include "RecursiveSolver.h"
+#include "TopRecursiveSolver.h"
 #include "LeftRecursiveSolver.h"
 #include "RightRecursiveSolver.h"
 #include "BottomRecursiveSolver.h"
@@ -273,7 +273,7 @@ unique_ptr<BaseSolver> Puzzle::choose_solver()
 		ret = make_unique<LeftRecursiveSolver>();
 		break;
 	case 1:
-		ret = make_unique<RecursiveSolver>();
+		ret = make_unique<TopRecursiveSolver>();
 		break;
 	case 2:
 		ret = make_unique<RightRecursiveSolver>();
