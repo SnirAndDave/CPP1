@@ -118,9 +118,9 @@
     <ClCompile Include="..\..\Main.cpp" />
     <ClCompile Include="..\..\Parser.cpp" />
     <ClCompile Include="..\..\Puzzle.cpp" />
-    <ClCompile Include="..\..\RecursiveSolver.cpp" />
     <ClCompile Include="..\..\RightRecursiveSolver.cpp" />
     <ClCompile Include="..\..\RotationRecursiveSolver.cpp" />
+    <ClCompile Include="..\..\TopRecursiveSolver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\BaseSolver.h" />
@@ -129,9 +129,9 @@
     <ClInclude Include="..\..\LeftRecursiveSolver.h" />
     <ClInclude Include="..\..\Parser.h" />
     <ClInclude Include="..\..\Puzzle.h" />
-    <ClInclude Include="..\..\RecursiveSolver.h" />
     <ClInclude Include="..\..\RightRecursiveSolver.h" />
     <ClInclude Include="..\..\RotationRecursiveSolver.h" />
+    <ClInclude Include="..\..\TopRecursiveSolver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

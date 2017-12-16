@@ -15,10 +15,34 @@ BottomRecursiveSolver::~BottomRecursiveSolver()
 {
 }
 
+void BottomRecursiveSolver::sort_elements(vector<Element>& elements)
+{
+	sort(elements.begin(), elements.end(), [](const Element & a, const Element & b) -> bool
+	{
+		if (a.top == 0 && b.top != 0)
+		{
+			return false;
+		}
+		if (b.top == 0 && a.top != 0)
+		{
+			return true;
+		}
+		if(a.bottom ==0 && b.bottom != 0)
+		{
+			return true;
+		}
+		if (b.bottom == 0 && a.bottom != 0)
+		{
+			return false;
+		}
+		return false;
+	});
+}
 
 bool BottomRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
 	vector<Element>& remaining_elements)
 {
+	sort_elements(remaining_elements);
 	return rec_solve(dimentions.first-1, 0, dimentions, puzzle, remaining_elements);
 }
 

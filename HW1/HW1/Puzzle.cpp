@@ -94,11 +94,11 @@ bool Puzzle::validate_sum_of_edges()
 
 void Puzzle::print_solution(const vector<vector<Element>>& vector)
 {
-	std::size_t rsize = vector.size();
-	for (std::size_t r = 0; r < rsize; r++)
+	size_t rsize = vector.size();
+	for (size_t r = 0; r < rsize; r++)
 	{
-		std::size_t csize = vector[r].size();
-		for (std::size_t c = 0; c < csize; c++)
+		size_t csize = vector[r].size();
+		for (size_t c = 0; c < csize; c++)
 		{
 			this->m_fout << vector[r][c].id;
 			if (vector[r][c].rotation() != 0)
