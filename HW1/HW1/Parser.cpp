@@ -181,7 +181,15 @@ void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<stri
                          int elements_count,
                          vector<Element>& elements)
 {
-	vector<string> delimited = split(line, ' ');
+	vector<string> delimited_copy = split(line, ' ');
+	vector<string> delimited;
+	for (unsigned i = 0; i < delimited_copy.size(); i++)
+	{
+		if (delimited_copy[i] != "")
+		{
+			delimited.push_back(delimited_copy[i]);
+		}
+	}
 	string msg;
 
 	if (!is_digits(delimited[0]))
