@@ -94,11 +94,11 @@ bool Puzzle::validate_sum_of_edges()
 
 void Puzzle::print_solution(const vector<vector<Element>>& vector)
 {
-	std::size_t rsize = vector.size();
-	for (std::size_t r = 0; r < rsize; r++)
+	size_t rsize = vector.size();
+	for (size_t r = 0; r < rsize; r++)
 	{
-		std::size_t csize = vector[r].size();
-		for (std::size_t c = 0; c < csize; c++)
+		size_t csize = vector[r].size();
+		for (size_t c = 0; c < csize; c++)
 		{
 			this->m_fout << vector[r][c].id;
 			if (vector[r][c].rotation() != 0)
@@ -257,14 +257,37 @@ unique_ptr<BaseSolver> Puzzle::choose_solver()
 	{
 		return make_unique<RotationRecursiveSolver>();
 	}
-	int edges_count[4] = {0,0,0,0};
+	double edges_count[4] = {0,0,0,0};
 	for (Element element : elements)
 	{
 		edges_count[0] += (element.left == 0 ? 1 : 0);
 		edges_count[1] += (element.top == 0 ? 1 : 0);
 		edges_count[2] += (element.right == 0 ? 1 : 0);
 		edges_count[3] += (element.bottom == 0 ? 1 : 0);
+
+		// give "penalty" for frame edge with multiple corners
+		if(element.left ==0 && element.top ==0)
+		{
+			edges_count[0] += 0.1;
+			edges_count[1] += 0.1;
+		}
+		if (element.top == 0 && element.right == 0)
+		{
+			edges_count[1] += 0.1;
+			edges_count[2] += 0.1;
+		}
+		if (element.right == 0 && element.bottom == 0)
+		{
+			edges_count[2] += 0.1;
+			edges_count[3] += 0.1;
+		}
+		if (element.bottom == 0 && element.left == 0)
+		{
+			edges_count[3] += 0.1;
+			edges_count[0] += 0.1;
+		}
 	}
+	
 	int min_edge_index = distance(edges_count, min_element(edges_count, edges_count + 4));
 	unique_ptr<BaseSolver> ret;
 	switch (min_edge_index)

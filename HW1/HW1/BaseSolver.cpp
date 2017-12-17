@@ -12,6 +12,10 @@ BaseSolver::~BaseSolver()
 }
 
 
+void BaseSolver::sort_elements(vector<Element>& elements)
+{
+}
+
 bool BaseSolver::can_be_placed(int r, int c, const pair<int, int>& dimensions, const vector<vector<Element>>& mat,
 	const Element& element)
 {

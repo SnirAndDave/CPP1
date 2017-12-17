@@ -19,7 +19,32 @@ RightRecursiveSolver::~RightRecursiveSolver()
 bool RightRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
                                  vector<Element>& remaining_elements)
 {
+	sort_elements(remaining_elements);
 	return rec_solve(0, dimentions.second - 1, dimentions, puzzle, remaining_elements);
+}
+
+void RightRecursiveSolver::sort_elements(vector<Element>& elements)
+{
+	sort(elements.begin(), elements.end(), [](const Element & a, const Element & b) -> bool
+	{
+		if (a.left == 0 && b.left != 0)
+		{
+			return false;
+		}
+		if (b.left == 0 && a.left != 0)
+		{
+			return true;
+		}
+		if (a.right == 0 && b.right != 0)
+		{
+			return true;
+		}
+		if (b.right == 0 && a.right != 0)
+		{
+			return false;
+		}
+		return false;
+	});
 }
 
 bool RightRecursiveSolver::can_be_placed(int r, int c, const pair<int, int>& dimensions,
