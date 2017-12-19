@@ -3,7 +3,6 @@
 #include <algorithm>
 
 
-
 using namespace std;
 
 
@@ -26,21 +25,21 @@ bool LeftRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Elemen
 
 void LeftRecursiveSolver::sort_elements(vector<Element>& elements)
 {
-	sort(elements.begin(), elements.end(), [](const Element & a, const Element & b) -> bool
+	sort(elements.begin(), elements.end(), [](const Element& a, const Element& b) -> bool
 	{
-		if (a.right == 0 && b.right != 0)
+		if (a._right == 0 && b._right != 0)
 		{
 			return false;
 		}
-		if (b.right == 0 && a.right != 0)
+		if (b._right == 0 && a._right != 0)
 		{
 			return true;
 		}
-		if (a.left == 0 && b.left != 0)
+		if (a._left == 0 && b._left != 0)
 		{
 			return true;
 		}
-		if (b.left == 0 && a.left != 0)
+		if (b._left == 0 && a._left != 0)
 		{
 			return false;
 		}
@@ -49,14 +48,14 @@ void LeftRecursiveSolver::sort_elements(vector<Element>& elements)
 }
 
 
-bool LeftRecursiveSolver::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
+bool LeftRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
                                     vector<Element>& remaining_elements)
 {
 	if (remaining_elements.empty() || c == dimensions.second)
 	{
 		return true;
 	}
-	for (Element remaining_element : remaining_elements)
+	for (const Element remaining_element : remaining_elements)
 	{
 		if (!can_be_placed(r, c, dimensions, mat, remaining_element))
 		{
@@ -67,8 +66,8 @@ bool LeftRecursiveSolver::rec_solve(int r, int c, pair<int, int>& dimensions, ve
 		remaining_elements_copy.erase(
 			remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element)
 			, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
-		int next_r = (r + 1) % dimensions.first; // end of line
-		int next_c = next_r == 0 ? c + 1 : c;
+		const int next_r = (r + 1) % dimensions.first; // end of line
+		const int next_c = next_r == 0 ? c + 1 : c;
 		if (rec_solve(next_r, next_c, dimensions, mat, remaining_elements_copy))
 		{
 			return true;
