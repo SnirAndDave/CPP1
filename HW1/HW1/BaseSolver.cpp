@@ -1,5 +1,6 @@
 #include "BaseSolver.h"
 #include "Puzzle.h"
+#include <algorithm>
 
 
 BaseSolver::BaseSolver()
@@ -14,6 +15,7 @@ BaseSolver::~BaseSolver()
 
 void BaseSolver::sort_elements(vector<Element>& elements)
 {
+	sort(elements.begin(), elements.end());
 }
 
 bool BaseSolver::can_be_placed(int r, int c, const pair<int, int>& dimensions, const vector<vector<Element>>& mat,
