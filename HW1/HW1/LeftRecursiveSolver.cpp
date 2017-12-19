@@ -3,7 +3,6 @@
 #include <algorithm>
 
 
-
 using namespace std;
 
 
@@ -24,14 +23,14 @@ bool LeftRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Elemen
 }
 
 
-bool LeftRecursiveSolver::rec_solve(int r, int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
+bool LeftRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
                                     vector<Element>& remaining_elements)
 {
 	if (remaining_elements.empty() || c == dimensions.second)
 	{
 		return true;
 	}
-	for (Element remaining_element : remaining_elements)
+	for (const Element remaining_element : remaining_elements)
 	{
 		if (!can_be_placed(r, c, dimensions, mat, remaining_element))
 		{
@@ -42,8 +41,8 @@ bool LeftRecursiveSolver::rec_solve(int r, int c, pair<int, int>& dimensions, ve
 		remaining_elements_copy.erase(
 			remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element)
 			, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
-		int next_r = (r + 1) % dimensions.first; // end of line
-		int next_c = next_r == 0 ? c + 1 : c;
+		const int next_r = (r + 1) % dimensions.first; // end of line
+		const int next_c = next_r == 0 ? c + 1 : c;
 		if (rec_solve(next_r, next_c, dimensions, mat, remaining_elements_copy))
 		{
 			return true;

@@ -12,19 +12,19 @@ using namespace std;
 
 bool Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_elements)
 {
-	int rel_size = puzzle.size + 1;
+	const int rel_size = puzzle._size + 1;
 	bool* ids = new bool[rel_size];
 	fill_n(ids, rel_size, false); //initialize with false
 	bool double_id = false;
 
 	for (auto it = puzzle.elements.begin(); it != puzzle.elements.end(); ++it)
 	{
-		// assume that each id has value < puzzle.size (it is checked)
-		if (ids[it->id])
+		// assume that each _id has value < puzzle._size (it is checked)
+		if (ids[it->_id])
 		{
 			double_id = true;
 		}
-		ids[it->id] = true;
+		ids[it->_id] = true;
 	}
 	for (auto i = 1; i < rel_size; i++)
 	{
@@ -38,10 +38,10 @@ bool Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_ele
 
 bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fout, vector<int>& missing_elements,
                                              vector<int>& wrong_ids, vector<string>& bad_format_lines,
-                                             vector<string>& bad_format_ids)
+                                             vector<string>& bad_format_ids) const
 {
 	bool is_valid = true;
-	bool double_id = get_missing_elements(puzzle, missing_elements);
+	const bool double_id = get_missing_elements(puzzle, missing_elements);
 
 	if (!missing_elements.empty())
 	{
@@ -55,7 +55,7 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 	if (!wrong_ids.empty())
 	{
 		std::ostringstream oss;
-		oss << "Puzzle of size " << puzzle.size << " cannot have the following IDs: ";
+		oss << "Puzzle of _size " << puzzle._size << " cannot have the following IDs: ";
 		is_valid = false;
 
 		get_ids_with_comma_delimiter(wrong_ids, oss);
@@ -67,7 +67,7 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 		for (auto const& line : bad_format_lines)
 		{
 			vector<string> delimited = split(line, ' ');
-			int id = stoi(delimited[0]);
+			const int id = stoi(delimited[0]);
 			fout << "Puzzle ID " << id << " has wrong data: " << line << endl;
 		}
 	}
@@ -77,9 +77,9 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 		ostringstream oss;
 		oss << "The following element(s) doesn't have a valid ID: ";
 
-		string last_id = bad_format_ids.back();
+		const string last_id = bad_format_ids.back();
 		bad_format_ids.pop_back();
-		for (string id : bad_format_ids)
+		for (const string id : bad_format_ids)
 		{
 			oss << id << ", ";
 		}
@@ -94,7 +94,7 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 	return is_valid;
 }
 
-void Parser::get_ids_with_comma_delimiter(vector<int>& elements, ostringstream& oss)
+void Parser::get_ids_with_comma_delimiter(vector<int>& elements, ostringstream& oss) const
 {
 	copy(elements.begin(), elements.end() - 1,
 	     ostream_iterator<int>(oss, ", "));
@@ -103,7 +103,7 @@ void Parser::get_ids_with_comma_delimiter(vector<int>& elements, ostringstream& 
 	oss << elements.back();
 }
 
-bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout)
+bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout) const
 {
 	string line;
 	vector<int> missing_elements;
@@ -115,28 +115,25 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout)
 	{
 		getline(fin, line);
 		clean_spaces(line);
-		puzzle.size = process_first_line(line, msg);
+		puzzle._size = process_first_line(line, msg);
 		while (getline(fin, line))
 		{
-			this->processLine(line, wrong_ids, bad_format_lines, bad_format_ids, puzzle.size, puzzle.elements);
+			this->process_line(line, wrong_ids, bad_format_lines, bad_format_ids, puzzle._size, puzzle.elements);
 		}
 
 		return check_if_valid_and_report_error(puzzle, fout, missing_elements, wrong_ids, bad_format_lines, bad_format_ids);
 	}
 	catch (exception ex)
 	{
-		//	fout << "Failed to parse input file - with exception: " << ex.what() << endl;
-		//fout << "" << ex.what() << endl;
-		//cout << ex.what() << endl;
 		fout << msg << endl;
 		return false;
 	}
 }
 
-int Parser::process_first_line(const string& line, string& msg)
+int Parser::process_first_line(const string& line, string& msg) const
 {
 	vector<string> delimited = split(line, '=');
-	string num = delimited[1];
+	const string num = delimited[1];
 	if (!is_digits(num))
 	{
 		msg = "invalid number of elements";
@@ -145,14 +142,14 @@ int Parser::process_first_line(const string& line, string& msg)
 	return stoi(num);
 }
 
-int Parser::parse_edge(string edge, string& msg)
+int Parser::parse_edge(const string edge, string& msg) const
 {
 	if (!is_digits_with_minus(edge))
 	{
 		msg = "edge is not a number";
 		throw exception();
 	}
-	int parsed = stoi(edge);
+	const int parsed = stoi(edge);
 	if (parsed < -1 || parsed > 1)
 	{
 		msg = "edge is not valid number";
@@ -176,20 +173,13 @@ bool Parser::is_digits_with_minus(const std::string& str)
 	return std::all_of(str.begin(), str.end(), ::isdigit);
 }
 
-void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
-                         vector<string>& bad_format_ids,
-                         int elements_count,
-                         vector<Element>& elements)
+void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
+                          vector<string>& bad_format_ids,
+                          const int elements_count,
+                          vector<Element>& elements) const
 {
-	vector<string> delimited_copy = split(line, ' ');
-	vector<string> delimited;
-	for (unsigned i = 0; i < delimited_copy.size(); i++)
-	{
-		if (delimited_copy[i] != "")
-		{
-			delimited.push_back(delimited_copy[i]);
-		}
-	}
+	vector<string> delimited = split(line, ' ');
+	
 	string msg;
 
 	if (!is_digits(delimited[0]))
@@ -198,7 +188,7 @@ void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<stri
 		return;
 	}
 
-	int id = stoi(delimited[0]);
+	const int id = stoi(delimited[0]);
 
 	if (id > elements_count || id <= 0)
 	{
@@ -208,18 +198,18 @@ void Parser::processLine(const string& line, vector<int>& wrong_ids, vector<stri
 
 	try
 	{
-		int left = parse_edge(delimited[1], msg);
-		int top = parse_edge(delimited[2], msg);
-		int right = parse_edge(delimited[3], msg);
-		int bottom = parse_edge(delimited[4], msg);
+		const int left = parse_edge(delimited[1], msg);
+		const int top = parse_edge(delimited[2], msg);
+		const int right = parse_edge(delimited[3], msg);
+		const int bottom = parse_edge(delimited[4], msg);
 
-		Element el(id, left, top, right, bottom);
+		const Element el(id, left, top, right, bottom);
 		elements.push_back(el);
 	}
 	catch (exception ex)
 	{
 		bad_format_lines.push_back(line);
-		Element el(id, 0, 0, 0, 0);
+		const Element el(id, 0, 0, 0, 0);
 		elements.push_back(el);
 	}
 }
@@ -230,13 +220,13 @@ void Parser::clean_spaces(string& str)
 }
 
 //splits string s to a vector
-vector<string> Parser::split(const string& s, char delim)
+vector<string> Parser::split(const string& s, const char delim) const
 {
 	vector<string> elems;
 	stringstream str_st(s);
 	string item;
 
-	while (getline(str_st, item, delim)) //we could ommit the '' notion from here.
+	while (getline(str_st, item, delim)) 
 	{
 		elems.push_back(item); //push_back is a function of vector class, it inserted to the back of the vector.
 	}
