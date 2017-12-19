@@ -17,21 +17,21 @@ BottomRecursiveSolver::~BottomRecursiveSolver()
 
 void BottomRecursiveSolver::sort_elements(vector<Element>& elements)
 {
-	sort(elements.begin(), elements.end(), [](const Element & a, const Element & b) -> bool
+	sort(elements.begin(), elements.end(), [](const Element& a, const Element& b) -> bool
 	{
-		if (a.top == 0 && b.top != 0)
+		if (a._top == 0 && b._top != 0)
 		{
 			return false;
 		}
-		if (b.top == 0 && a.top != 0)
+		if (b._top == 0 && a._top != 0)
 		{
 			return true;
 		}
-		if(a.bottom ==0 && b.bottom != 0)
+		if (a._bottom == 0 && b._bottom != 0)
 		{
 			return true;
 		}
-		if (b.bottom == 0 && a.bottom != 0)
+		if (b._bottom == 0 && a._bottom != 0)
 		{
 			return false;
 		}

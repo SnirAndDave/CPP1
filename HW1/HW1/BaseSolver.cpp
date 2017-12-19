@@ -10,6 +10,7 @@ BaseSolver::BaseSolver()
 BaseSolver::~BaseSolver()
 {
 }
+
 void BaseSolver::sort_elements(vector<Element>& elements)
 {
 }
@@ -17,9 +18,7 @@ void BaseSolver::sort_elements(vector<Element>& elements)
 
 bool BaseSolver::can_be_placed(const int r, const int c, const pair<int, int>& dimensions,
                                const vector<vector<Element>>& mat,
-
-
-
+                               const Element& element)
 {
 	if (Puzzle::get_element(mat, r - 1, c)._bottom + element._top != 0)
 	{

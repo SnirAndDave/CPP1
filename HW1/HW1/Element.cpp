@@ -1,6 +1,6 @@
 #include "Element.h"
 
-Element::Element(int id, int left, int top, int right, int down)
+Element::Element(const int id, const int left, const int top, const int right, const int down)
 	: _id(id),
 	  _left(left),
 	  _top(top),

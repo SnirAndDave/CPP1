@@ -179,7 +179,7 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
                           vector<Element>& elements) const
 {
 	vector<string> delimited = split(line, ' ');
-	
+
 	string msg;
 
 	if (!is_digits(delimited[0]))
@@ -226,7 +226,7 @@ vector<string> Parser::split(const string& s, const char delim) const
 	stringstream str_st(s);
 	string item;
 
-	while (getline(str_st, item, delim)) 
+	while (getline(str_st, item, delim))
 	{
 		elems.push_back(item); //push_back is a function of vector class, it inserted to the back of the vector.
 	}

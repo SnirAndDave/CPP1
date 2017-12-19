@@ -25,21 +25,21 @@ bool LeftRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Elemen
 
 void LeftRecursiveSolver::sort_elements(vector<Element>& elements)
 {
-	sort(elements.begin(), elements.end(), [](const Element & a, const Element & b) -> bool
+	sort(elements.begin(), elements.end(), [](const Element& a, const Element& b) -> bool
 	{
-		if (a.right == 0 && b.right != 0)
+		if (a._right == 0 && b._right != 0)
 		{
 			return false;
 		}
-		if (b.right == 0 && a.right != 0)
+		if (b._right == 0 && a._right != 0)
 		{
 			return true;
 		}
-		if (a.left == 0 && b.left != 0)
+		if (a._left == 0 && b._left != 0)
 		{
 			return true;
 		}
-		if (b.left == 0 && a.left != 0)
+		if (b._left == 0 && a._left != 0)
 		{
 			return false;
 		}

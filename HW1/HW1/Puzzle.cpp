@@ -266,28 +266,28 @@ unique_ptr<BaseSolver> Puzzle::choose_solver()
 		edges_count[3] += (element._bottom == 0 ? 1 : 0);
 
 		// give "penalty" for frame edge with multiple corners
-		if(element.left ==0 && element.top ==0)
+		if (element._left == 0 && element._top == 0)
 		{
 			edges_count[0] += 0.1;
 			edges_count[1] += 0.1;
 		}
-		if (element.top == 0 && element.right == 0)
+		if (element._top == 0 && element._right == 0)
 		{
 			edges_count[1] += 0.1;
 			edges_count[2] += 0.1;
 		}
-		if (element.right == 0 && element.bottom == 0)
+		if (element._right == 0 && element._bottom == 0)
 		{
 			edges_count[2] += 0.1;
 			edges_count[3] += 0.1;
 		}
-		if (element.bottom == 0 && element.left == 0)
+		if (element._bottom == 0 && element._left == 0)
 		{
 			edges_count[3] += 0.1;
 			edges_count[0] += 0.1;
 		}
 	}
-	
+	const int min_edge_index = distance(edges_count, min_element(edges_count, edges_count + 4));
 	unique_ptr<BaseSolver> ret;
 	switch (min_edge_index)
 	{

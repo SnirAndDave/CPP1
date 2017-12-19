@@ -1,8 +1,9 @@
 #pragma once
-#ifndef __ELEMENT_H_INCLUDED__   
+#ifndef __ELEMENT_H_INCLUDED__
 #define __ELEMENT_H_INCLUDED__   
 
-class Element {
+class Element
+{
 	friend bool operator<(const Element& lhs, const Element& rhs)
 	{
 		return lhs._id < rhs._id;

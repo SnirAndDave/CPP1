@@ -27,8 +27,8 @@ public:
 
 
 	void process_line(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
-	                 vector<string>& bad_format_ids, int
-	                 elements_count, vector<Element>& elements) const;
+	                  vector<string>& bad_format_ids, int
+	                  elements_count, vector<Element>& elements) const;
 	static void clean_spaces(string& str);
 	vector<string> split(const string& s, char delim) const;
 
