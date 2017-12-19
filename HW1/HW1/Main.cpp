@@ -1,23 +1,23 @@
 #include "Parser.h"
 #include <iostream>
 
-pair<string,string> parse_arguments(int argc, char* argv[])
+pair<string, string> parse_arguments(const int argc, char* argv[])
 {
 	const string rotate = "-rotate";
-	if(argc == 3)
+	if (argc == 3)
 	{
 		return pair<string, string>(argv[1], argv[2]);
 	}
-	if(argc != 4)
+	if (argc != 4)
 	{
 		cout << "Error: invalid arguments";
 		throw exception();
 	}
-	if(argv[1] == rotate)
+	if (argv[1] == rotate)
 	{
 		return pair<string, string>(argv[2], argv[3]);
 	}
-	if(argv[2] == rotate)
+	if (argv[2] == rotate)
 	{
 		return pair<string, string>(argv[1], argv[3]);
 	}
@@ -29,23 +29,23 @@ pair<string,string> parse_arguments(int argc, char* argv[])
 	throw exception();
 }
 
-int main(int argc, char* argv[])
+int main(const int argc, char* argv[])
 {
 	string fin_path;
 	string fout_path;
-	
+
 	try
 	{
-		pair<string,string> pair = parse_arguments(argc, argv);
+		const pair<string, string> pair = parse_arguments(argc, argv);
 		fin_path = pair.first;
 		fout_path = pair.second;
 	}
-	catch(exception)
+	catch (exception)
 	{
 		return 0;
 	}
 
-	bool rotation_enabled = argc == 4;
+	const bool rotation_enabled = argc == 4;
 	ifstream fin(fin_path, ifstream::in);
 	if (!fin.good())
 	{
