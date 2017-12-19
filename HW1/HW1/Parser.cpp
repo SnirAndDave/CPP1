@@ -54,7 +54,7 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 	}
 	if (!wrong_ids.empty())
 	{
-		std::ostringstream oss;
+		ostringstream oss;
 		oss << "Puzzle of _size " << puzzle._size << " cannot have the following IDs: ";
 		is_valid = false;
 
@@ -158,19 +158,19 @@ int Parser::parse_edge(const string edge, string& msg) const
 	return parsed;
 }
 
-bool Parser::is_digits(const std::string& str)
+bool Parser::is_digits(const string& str)
 {
-	return std::all_of(str.begin(), str.end(), ::isdigit);
+	return all_of(str.begin(), str.end(), isdigit);
 }
 
-bool Parser::is_digits_with_minus(const std::string& str)
+bool Parser::is_digits_with_minus(const string& str)
 {
 	if (str[0] == '-')
 	{
 		string str2 = str.substr(1, str.size());
-		return std::all_of(str2.begin(), str2.end(), ::isdigit);
+		return all_of(str2.begin(), str2.end(), isdigit);
 	}
-	return std::all_of(str.begin(), str.end(), ::isdigit);
+	return all_of(str.begin(), str.end(), isdigit);
 }
 
 void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
@@ -216,7 +216,7 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 
 void Parser::clean_spaces(string& str)
 {
-	str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
+	str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
 }
 
 //splits string s to a vector
