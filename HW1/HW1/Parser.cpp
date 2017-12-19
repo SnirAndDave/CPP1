@@ -160,7 +160,7 @@ int Parser::parse_edge(const string edge, string& msg) const
 
 bool Parser::is_digits(const string& str)
 {
-	return all_of(str.begin(), str.end(), isdigit);
+	return all_of(str.begin(), str.end(), ::isdigit);
 }
 
 bool Parser::is_digits_with_minus(const string& str)
@@ -168,9 +168,9 @@ bool Parser::is_digits_with_minus(const string& str)
 	if (str[0] == '-')
 	{
 		string str2 = str.substr(1, str.size());
-		return all_of(str2.begin(), str2.end(), isdigit);
+		return all_of(str2.begin(), str2.end(), ::isdigit);
 	}
-	return all_of(str.begin(), str.end(), isdigit);
+	return all_of(str.begin(), str.end(), ::isdigit);
 }
 
 void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
@@ -216,7 +216,7 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 
 void Parser::clean_spaces(string& str)
 {
-	str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
+	str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
 }
 
 //splits string s to a vector
