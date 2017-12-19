@@ -1,11 +1,12 @@
 #pragma once
-#ifndef __ELEMENT_H_INCLUDED__   
+#ifndef __ELEMENT_H_INCLUDED__
 #define __ELEMENT_H_INCLUDED__   
 
-class Element {
+class Element
+{
 	friend bool operator<(const Element& lhs, const Element& rhs)
 	{
-		return lhs.id < rhs.id;
+		return lhs._id < rhs._id;
 	}
 
 	friend bool operator<=(const Element& lhs, const Element& rhs)
@@ -25,7 +26,7 @@ class Element {
 
 	friend bool operator==(const Element& lhs, const Element& rhs)
 	{
-		return lhs.id == rhs.id;
+		return lhs._id == rhs._id;
 	}
 
 	friend bool operator!=(const Element& lhs, const Element& rhs)
@@ -38,12 +39,12 @@ public:
 	Element();
 	int rotation() const;
 	void rotate_right();
-	int id;
-	int left;
-	int top;
-	int right;
-	int bottom;
+	int _id;
+	int _left;
+	int _top;
+	int _right;
+	int _bottom;
 private:
-	int rotation_;
+	int _rotation;
 };
 #endif
