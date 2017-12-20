@@ -1,18 +1,17 @@
 #include "TopRecursiveSolver.h"
 #include <sstream>
 #include <algorithm>
+#include "Puzzle.h"
 
 using namespace std;
 
 
 TopRecursiveSolver::TopRecursiveSolver()
-{
-}
+= default;
 
 
 TopRecursiveSolver::~TopRecursiveSolver()
-{
-}
+= default;
 
 
 bool TopRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
@@ -50,6 +49,7 @@ void TopRecursiveSolver::sort_elements(vector<Element>& elements)
 bool TopRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
                                    vector<Element>& remaining_elements)
 {
+	//Puzzle::print_solution_to_console(mat);
 	if (remaining_elements.empty() || r == dimensions.first)
 	{
 		return true;
@@ -64,7 +64,7 @@ bool TopRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& dim
 		vector<Element> remaining_elements_copy = remaining_elements;
 		remaining_elements_copy.erase(
 			remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element)
-			, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
+			, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining _elements
 		const int next_c = (c + 1) % dimensions.second; // end of line
 		const int next_r = next_c == 0 ? r + 1 : r;
 		if (rec_solve(next_r, next_c, dimensions, mat, remaining_elements_copy))
@@ -72,6 +72,7 @@ bool TopRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& dim
 			return true;
 		}
 		mat[r][c] = Element();
+		
 	}
 	return false;
 }

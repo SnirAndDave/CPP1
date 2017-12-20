@@ -8,6 +8,7 @@
 #include "LeftRecursiveSolver.h"
 #include "RightRecursiveSolver.h"
 #include "BottomRecursiveSolver.h"
+#include <iostream>
 
 using namespace std;
 
@@ -33,7 +34,7 @@ vector<Corner> Puzzle::find_missing_corners()
 	bool found_corners[4] = {false, false, false, false};
 	const int iterations = _is_rotation_enabled ? 4 : 1;
 	vector<Corner> missing_corners;
-	for (Element element : this->elements)
+	for (Element element : this->_elements)
 	{
 		for (int i = 0; i < iterations; i++)
 		{
@@ -76,7 +77,7 @@ vector<Corner> Puzzle::find_missing_corners()
 bool Puzzle::validate_sum_of_edges()
 {
 	int sum = 0;
-	for (const Element element : this->elements)
+	for (const Element element : this->_elements)
 	{
 		sum += (element._left
 			+ element._top
@@ -92,18 +93,38 @@ bool Puzzle::validate_sum_of_edges()
 	return sum == 0;
 }
 
-void Puzzle::print_solution(const vector<vector<Element>>& vector) const
+void Puzzle::print_solution_to_console(const vector<vector<Element>>& matrix)
 {
-	const size_t rsize = vector.size();
+	const size_t rsize = matrix.size();
 	for (size_t r = 0; r < rsize; r++)
 	{
-		const size_t csize = vector[r].size();
+		const size_t csize = matrix[r].size();
 		for (size_t c = 0; c < csize; c++)
 		{
-			this->_m_fout << vector[r][c]._id;
-			if (vector[r][c].rotation() != 0)
+			cout << matrix[r][c]._id;
+			
+			if (c < csize - 1)
 			{
-				this->_m_fout << " [" << vector[r][c].rotation() << "]";
+				cout << " ";
+			}
+		}
+		cout << endl;
+	}
+	cout << endl << endl << endl;
+}
+
+void Puzzle::print_solution(const vector<vector<Element>>& matrix) const
+{
+	const size_t rsize = matrix.size();
+	for (size_t r = 0; r < rsize; r++)
+	{
+		const size_t csize = matrix[r].size();
+		for (size_t c = 0; c < csize; c++)
+		{
+			this->_m_fout << matrix[r][c]._id;
+			if (matrix[r][c].rotation() != 0)
+			{
+				this->_m_fout << " [" << matrix[r][c].rotation() << "]";
 			}
 			if (c < csize - 1)
 			{
@@ -114,14 +135,14 @@ void Puzzle::print_solution(const vector<vector<Element>>& vector) const
 	}
 }
 
-vector<pair<int, int>> Puzzle::size_to_matrices()
+vector<pair<int, int>> Puzzle::size_to_matrices() const
 {
 	vector<pair<int, int>> ret;
 	for (int i = 1; i <= _size; i++)
 	{
 		if (_size % i == 0)
 		{
-			ret.push_back(pair<int, int>(i, _size / i));
+			ret.emplace_back(i, _size / i);
 		}
 	}
 	// sort by min dimention
@@ -137,7 +158,7 @@ vector<pair<int, int>> Puzzle::size_to_matrices()
 int Puzzle::get_straight_edges_count()
 {
 	int cnt = 0;
-	for (const Element element : this->elements)
+	for (const Element element : this->_elements)
 	{
 		cnt += element._left == 0 ? 1 : 0;
 		cnt += element._top == 0 ? 1 : 0;
@@ -169,7 +190,7 @@ vector<pair<int, int>> Puzzle::get_valid_dimensions(vector<pair<int, int>> dimen
 
 vector<vector<vector<Element>>> Puzzle::create_all_permutations_of_dimension(const pair<int, int> dimensions) const
 {
-	vector<Element> copy = elements;
+	vector<Element> copy = _elements;
 	sort(copy.begin(), copy.end());
 	vector<vector<vector<Element>>> ret;
 	do
@@ -198,11 +219,11 @@ vector<vector<Element>> Puzzle::vector_to_mat(vector<Element> copy, const pair<i
 	return ret;
 }
 
-Element Puzzle::get_element(const vector<vector<Element>> mat, const int r, const int c)
+Element Puzzle::get_element(const vector<vector<Element>>& mat, const int r, const int c)
 {
 	if (r < 0 || c < 0 || r >= int(mat.size()) || c >= int(mat[r].size()))
 	{
-		return Element(0, 0, 0, 0, 0);
+		return {0, 0, 0, 0, 0};
 	}
 	return mat[r][c];
 }
@@ -242,9 +263,10 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimension
 	for (int r = 0; r < dimensions.first; r++)
 	{
 		vector<Element> col;
+		col.reserve(dimensions.second);
 		for (int c = 0; c < dimensions.second; c++)
 		{
-			col.push_back(Element());
+			col.emplace_back();
 		}
 		ret.push_back(col);
 	}
@@ -257,8 +279,8 @@ unique_ptr<BaseSolver> Puzzle::choose_solver()
 	{
 		return make_unique<RotationRecursiveSolver>();
 	}
-	double edges_count[4] = {0,0,0,0};
-	for (const Element element : elements)
+	double edges_count[4] = {0, 0, 0, 0};
+	for (const Element element : _elements)
 	{
 		edges_count[0] += (element._left == 0 ? 1 : 0);
 		edges_count[1] += (element._top == 0 ? 1 : 0);
@@ -322,7 +344,7 @@ void Puzzle::solve()
 	unique_ptr<BaseSolver> solver = choose_solver();
 	for (pair<int, int> row_col_pair : valid_dimensions)
 	{
-		vector<Element> elements_copy = elements;
+		vector<Element> elements_copy = _elements;
 		vector<vector<Element>> mat = create_empty_mat(row_col_pair);
 
 		if (solver->solve(row_col_pair, mat, elements_copy))
