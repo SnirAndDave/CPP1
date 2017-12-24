@@ -142,7 +142,7 @@ vector<pair<int, int>> Puzzle::size_to_matrices() const
 	{
 		if (_size % i == 0)
 		{
-			ret.emplace_back(i, _size / i);
+			ret.push_back(pair<int, int>(i, _size / i));
 		}
 	}
 	// sort by min dimention
@@ -154,6 +154,7 @@ vector<pair<int, int>> Puzzle::size_to_matrices() const
 	});
 	return ret;
 }
+
 
 int Puzzle::get_straight_edges_count()
 {
@@ -263,10 +264,9 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimension
 	for (int r = 0; r < dimensions.first; r++)
 	{
 		vector<Element> col;
-		col.reserve(dimensions.second);
 		for (int c = 0; c < dimensions.second; c++)
 		{
-			col.emplace_back();
+			col.push_back(Element());
 		}
 		ret.push_back(col);
 	}
