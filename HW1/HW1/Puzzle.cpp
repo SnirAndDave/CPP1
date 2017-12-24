@@ -68,7 +68,7 @@ vector<Corner> Puzzle::find_missing_corners()
 			missing_corners.push_back(corner);
 			ostringstream oss;
 			oss << "Cannot solve puzzle: missing corner element: " + corner_to_string(corner);
-			_m_fout << oss.str() << endl;
+			_fout << oss.str() << endl;
 		}
 	}
 	return missing_corners;
@@ -88,7 +88,7 @@ bool Puzzle::validate_sum_of_edges()
 	{
 		ostringstream oss;
 		oss << "Cannot solve puzzle: sum of edges is not zero";
-		_m_fout << oss.str() << endl;
+		_fout << oss.str() << endl;
 	}
 	return sum == 0;
 }
@@ -121,17 +121,17 @@ void Puzzle::print_solution(const vector<vector<Element>>& matrix) const
 		const size_t csize = matrix[r].size();
 		for (size_t c = 0; c < csize; c++)
 		{
-			this->_m_fout << matrix[r][c]._id;
+			this->_fout << matrix[r][c]._id;
 			if (matrix[r][c].rotation() != 0)
 			{
-				this->_m_fout << " [" << matrix[r][c].rotation() << "]";
+				this->_fout << " [" << matrix[r][c].rotation() << "]";
 			}
 			if (c < csize - 1)
 			{
-				this->_m_fout << " ";
+				this->_fout << " ";
 			}
 		}
-		_m_fout << endl;
+		_fout << endl;
 	}
 }
 
@@ -184,7 +184,7 @@ vector<pair<int, int>> Puzzle::get_valid_dimensions(vector<pair<int, int>> dimen
 	{
 		ostringstream oss;
 		oss << "Cannot solve puzzle: wrong number of straight edges";
-		_m_fout << oss.str() << endl;
+		_fout << oss.str() << endl;
 	}
 	return valid_dimensions;
 }
@@ -273,11 +273,13 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimension
 	return ret;
 }
 
-unique_ptr<BaseSolver> Puzzle::choose_solver()
+vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 {
+	vector<shared_ptr<BaseSolver>> ret;
 	if (_is_rotation_enabled)
 	{
-		return make_unique<RotationRecursiveSolver>();
+		ret.push_back(make_shared<RotationRecursiveSolver>());
+		return ret;
 	}
 	double edges_count[4] = {0, 0, 0, 0};
 	for (const Element element : _elements)
@@ -310,22 +312,11 @@ unique_ptr<BaseSolver> Puzzle::choose_solver()
 		}
 	}
 	const int min_edge_index = distance(edges_count, min_element(edges_count, edges_count + 4));
-	unique_ptr<BaseSolver> ret;
-	switch (min_edge_index)
-	{
-	case 0:
-		ret = make_unique<LeftRecursiveSolver>();
-		break;
-	case 1:
-		ret = make_unique<TopRecursiveSolver>();
-		break;
-	case 2:
-		ret = make_unique<RightRecursiveSolver>();
-		break;
-	default:
-		ret = make_unique<BottomRecursiveSolver>();
-		break;
-	}
+	ret.push_back(make_shared<BottomRecursiveSolver>());
+	ret.push_back(make_shared<RightRecursiveSolver>());
+	ret.push_back(make_shared<TopRecursiveSolver>());
+	ret.push_back(make_shared<LeftRecursiveSolver>());
+	
 	return ret;
 }
 
@@ -335,23 +326,85 @@ void Puzzle::solve()
 	vector<pair<int, int>> valid_dimensions = get_valid_dimensions(dimensions);
 	vector<Corner> missing_corners = find_missing_corners();
 	const bool is_sum_zero = validate_sum_of_edges();
+	vector<thread> vec_threads(_thread_cnt-1);
 
 	if (!is_sum_zero || !missing_corners.empty() || valid_dimensions.empty())
 	{
 		return;
 	}
 
-	unique_ptr<BaseSolver> solver = choose_solver();
+	vector<shared_ptr<BaseSolver>> solvers = choose_solver();
 	for (pair<int, int> row_col_pair : valid_dimensions)
 	{
-		vector<Element> elements_copy = _elements;
-		vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-
-		if (solver->solve(row_col_pair, mat, elements_copy))
+		_finished = false;
+		_solved = false;
+		_solution.clear();
+		if(_thread_cnt == 1)
 		{
-			print_solution(mat);
+			vector<Element> elements_copy = _elements;
+			vector<vector<Element>> mat = create_empty_mat(row_col_pair);
+
+			if (solvers[0]->solve(row_col_pair, mat, elements_copy))
+			{
+				print_solution(mat);
+				return;
+			}
+			continue;
+		}
+
+		for(int i=0;i<_thread_cnt-1;i++)
+		{
+			vec_threads[i] = thread(&Puzzle::thread_solve, this, row_col_pair, solvers[i]);
+		}
+
+		unique_lock<mutex> lock(_mutex);
+		_cv.wait(lock, [this] { return _finished; });
+		lock.unlock();
+
+		for(thread& t: vec_threads)
+		{
+			t.detach();
+		}
+		if(_solved)
+		{
+			print_solution(_solution);
 			return;
 		}
+
 	}
-	this->_m_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
+	this->_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
+}
+
+void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
+{
+	unique_lock<mutex> lock(_mutex);
+	if(_finished)
+	{
+		lock.unlock();
+		_cv.notify_all();
+		return;
+	}
+	_finished = true;
+	_solved = solved;
+	if(solved)
+	{
+		_solution = mat;
+	}
+	lock.unlock();
+	_cv.notify_all();
+}
+
+void Puzzle::thread_solve(pair<int, int> row_col_pair, const shared_ptr<BaseSolver>& solver)
+{
+	vector<Element> elements_copy;
+	for(Element element:_elements)
+	{
+		Element copy = element;
+		elements_copy.push_back(copy);
+	}
+
+	vector<vector<Element>> mat = create_empty_mat(row_col_pair);
+
+	bool solved = solver->solve(row_col_pair, mat, elements_copy);
+	set_solution(mat, solved);
 }

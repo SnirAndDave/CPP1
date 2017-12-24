@@ -1,7 +1,7 @@
 #include "Parser.h"
 #include <iostream>
 
-pair<string, string> parse_arguments(const int argc, char* argv[])
+pair<string, string> parse_arguments(const int argc, char* argv[], int& thread_cnt)
 {
 	const string rotate = "-rotate";
 	if (argc == 3)
@@ -33,10 +33,10 @@ int main(const int argc, char* argv[])
 {
 	string fin_path;
 	string fout_path;
-
+	int thread_cnt = 5;
 	try
 	{
-		const pair<string, string> pair = parse_arguments(argc, argv);
+		const pair<string, string> pair = parse_arguments(argc, argv, thread_cnt);
 		fin_path = pair.first;
 		fout_path = pair.second;
 	}
@@ -50,12 +50,12 @@ int main(const int argc, char* argv[])
 	if (!fin.good())
 	{
 		cout << "error: opening file " + string(fin_path) + " failed";
-		return false;
+		return 0;
 	}
 
 	ofstream fout(fout_path, ofstream::out);
 	Parser parser;
-	Puzzle puzzle(fout, rotation_enabled);
+	Puzzle puzzle(fout, rotation_enabled, thread_cnt);
 	if (!parser.parse(fin, puzzle, fout))
 	{
 		fin.close();
