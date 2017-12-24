@@ -7,13 +7,11 @@ using namespace std;
 
 
 BottomRecursiveSolver::BottomRecursiveSolver()
-{
-}
+= default;
 
 
 BottomRecursiveSolver::~BottomRecursiveSolver()
-{
-}
+= default;
 
 void BottomRecursiveSolver::sort_elements(vector<Element>& elements)
 {
@@ -74,6 +72,7 @@ bool BottomRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& 
                                       vector<vector<Element>>& mat,
                                       vector<Element>& remaining_elements)
 {
+	//Puzzle::print_solution_to_console(mat);
 	if (remaining_elements.empty() || c == dimensions.second)
 	{
 		return true;
@@ -88,7 +87,7 @@ bool BottomRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& 
 		vector<Element> remaining_elements_copy = remaining_elements;
 		remaining_elements_copy.erase(
 			remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element)
-			, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
+			, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining _elements
 		const int next_c = (c + 1) % dimensions.second;
 		const int next_r = next_c == 0 ? r - 1 : r;
 		if (rec_solve(next_r, next_c, dimensions, mat, remaining_elements_copy))

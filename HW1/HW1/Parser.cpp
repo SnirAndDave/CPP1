@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "Parser.h"
 #include <iterator>
-#include <ctype.h>
+#include <cctype>
 
 using namespace std;
 
@@ -17,14 +17,14 @@ bool Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_ele
 	fill_n(ids, rel_size, false); //initialize with false
 	bool double_id = false;
 
-	for (auto it = puzzle.elements.begin(); it != puzzle.elements.end(); ++it)
+	for (const auto & element : puzzle._elements)
 	{
 		// assume that each _id has value < puzzle._size (it is checked)
-		if (ids[it->_id])
+		if (ids[element._id])
 		{
 			double_id = true;
 		}
-		ids[it->_id] = true;
+		ids[element._id] = true;
 	}
 	for (auto i = 1; i < rel_size; i++)
 	{
@@ -79,7 +79,7 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 
 		const string last_id = bad_format_ids.back();
 		bad_format_ids.pop_back();
-		for (const string id : bad_format_ids)
+		for (const string& id : bad_format_ids)
 		{
 			oss << id << ", ";
 		}
@@ -118,7 +118,7 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout) const
 		puzzle._size = process_first_line(line, msg);
 		while (getline(fin, line))
 		{
-			this->process_line(line, wrong_ids, bad_format_lines, bad_format_ids, puzzle._size, puzzle.elements);
+			this->process_line(line, wrong_ids, bad_format_lines, bad_format_ids, puzzle._size, puzzle._elements);
 		}
 
 		return check_if_valid_and_report_error(puzzle, fout, missing_elements, wrong_ids, bad_format_lines, bad_format_ids);
@@ -136,13 +136,13 @@ int Parser::process_first_line(const string& line, string& msg) const
 	const string num = delimited[1];
 	if (!is_digits(num))
 	{
-		msg = "invalid number of elements";
+		msg = "invalid number of _elements";
 		throw exception();
 	}
 	return stoi(num);
 }
 
-int Parser::parse_edge(const string edge, string& msg) const
+int Parser::parse_edge(const string& edge, string& msg) const
 {
 	if (!is_digits_with_minus(edge))
 	{

@@ -21,7 +21,7 @@ public:
 	bool parse(ifstream& fin, Puzzle& puzzle, ofstream& fout) const;
 
 	int process_first_line(const string& line, string& msg) const;
-	int parse_edge(string edge, string& msg) const;
+	int parse_edge(const string& edge, string& msg) const;
 	static bool is_digits(const string& str);
 	static bool is_digits_with_minus(const string& str);
 
