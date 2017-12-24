@@ -7,13 +7,11 @@ using namespace std;
 
 
 RightRecursiveSolver::RightRecursiveSolver()
-{
-}
+= default;
 
 
 RightRecursiveSolver::~RightRecursiveSolver()
-{
-}
+= default;
 
 
 bool RightRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
@@ -74,6 +72,7 @@ bool RightRecursiveSolver::can_be_placed(const int r, const int c, const pair<in
 bool RightRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& dimensions, vector<vector<Element>>& mat,
                                      vector<Element>& remaining_elements)
 {
+	//Puzzle::print_solution_to_console(mat);
 	if (remaining_elements.empty() || c == dimensions.second)
 	{
 		return true;
@@ -88,7 +87,7 @@ bool RightRecursiveSolver::rec_solve(const int r, const int c, pair<int, int>& d
 		vector<Element> remaining_elements_copy = remaining_elements;
 		remaining_elements_copy.erase(
 			remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element)
-			, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining elements
+			, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining _elements
 		const int next_r = (r + 1) % dimensions.first; // end of line
 		const int next_c = next_r == 0 ? c - 1 : c;
 		if (rec_solve(next_r, next_c, dimensions, mat, remaining_elements_copy))
