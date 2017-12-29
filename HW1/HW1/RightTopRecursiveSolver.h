@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __RIGHTRECURSIVESOLVER_H_INCLUDED__
-#define __RIGHTRECURSIVESOLVER_H_INCLUDED__   
+#ifndef __RIGHTTOPRECURSIVESOLVER_H_INCLUDED__
+#define __RIGHTTOPRECURSIVESOLVER_H_INCLUDED__   
 #include "BaseSolver.h"
 #include "Puzzle.h"
 
@@ -18,7 +18,7 @@ protected:
 	                          const Element& element);
 private:
 
-	bool rec_solve(int r, const bool is_rotation_enabled, int c, pair<int, int>& dimensions,
+	bool rec_solve(int r, int c, const bool is_rotation_enabled, pair<int, int>& dimensions,
 	               vector<vector<Element>>& mat, vector<Element>& remaining_elements) const;
 };
 #endif

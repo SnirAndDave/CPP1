@@ -7,7 +7,14 @@
 #include "BaseSolver.h"
 #include <thread>
 #include <mutex>
-#include <atomic>
+#include "TopLeftRecursiveSolver.h"
+#include "TopRightRecursiveSolver.h"
+#include "LeftTopRecursiveSolver.h"
+#include "LeftBottomRecursiveSolver.h"
+#include "RightTopRecursiveSolver.h"
+#include "RightBottomRecursiveSolver.h"
+#include "BottomLeftRecursiveSolver.h"
+#include "BottomRightRecursiveSolver.h"
 
 using namespace std;
 

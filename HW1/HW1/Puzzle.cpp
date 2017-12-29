@@ -2,11 +2,6 @@
 #include <sstream>
 #include <algorithm>
 #include <memory>
-#include "BaseSolver.h"
-#include "TopLeftRecursiveSolver.h"
-#include "LeftTopRecursiveSolver.h"
-#include "RightTopRecursiveSolver.h"
-#include "BottomLeftRecursiveSolver.h"
 #include <iostream>
 
 using namespace std;
@@ -305,11 +300,51 @@ vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 			edges_count[0] += 0.1;
 		}
 	}
-	const int min_edge_index = distance(edges_count, min_element(edges_count, edges_count + 4));
-	ret.push_back(make_shared<BottomLeftRecursiveSolver>());
-	ret.push_back(make_shared<RightTopRecursiveSolver>());
-	ret.push_back(make_shared<TopLeftRecursiveSolver>());
-	ret.push_back(make_shared<LeftTopRecursiveSolver>());
+
+	int sorted_edges_order[4] = {-1, -1, -1, -1};
+	for (int& i : sorted_edges_order)
+	{
+		double min_elem = 1000.0;
+		int min_index = -1;
+		for (size_t j = 0; j < 4; j++)
+		{
+			if (find(begin(sorted_edges_order), end(sorted_edges_order), j) == end(sorted_edges_order))
+			{
+				//index not used yet
+				if (edges_count[j] <= min_elem)
+				{
+					min_elem = edges_count[j];
+					min_index = j;
+				}
+			}
+		}
+		i = min_index;
+	}
+
+	for (int& index : sorted_edges_order)
+	{
+		cout << index << " ";
+		switch (index)
+		{
+		case 0:
+			ret.push_back(make_shared<LeftTopRecursiveSolver>());
+			ret.push_back(make_shared<LeftBottomRecursiveSolver>());
+			break;
+		case 1:
+			ret.push_back(make_shared<TopLeftRecursiveSolver>());
+			ret.push_back(make_shared<TopRightRecursiveSolver>());
+			break;
+		case 2:
+			ret.push_back(make_shared<RightTopRecursiveSolver>());
+			ret.push_back(make_shared<RightBottomRecursiveSolver>());
+			break;
+		default:
+			ret.push_back(make_shared<BottomLeftRecursiveSolver>());
+			ret.push_back(make_shared<BottomRightRecursiveSolver>());
+			break;
+		}
+	}
+	cout << endl;
 
 	return ret;
 }

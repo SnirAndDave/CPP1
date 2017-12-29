@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __RECURSIVESOLVER_H_INCLUDED__
-#define __RECURSIVESOLVER_H_INCLUDED__   
+#ifndef __TOPLEFTRECURSIVESOLVER_H_INCLUDED__
+#define __TOPLEFTRECURSIVESOLVER_H_INCLUDED__   
 #include "BaseSolver.h"
 
 class TopLeftRecursiveSolver :
@@ -18,7 +18,7 @@ protected:
 	void sort_elements(vector<Element>& elements) override;
 
 private:
-	bool rec_solve(int r, const bool is_rotation_enabled, int c, pair<int, int>& dimensions,
+	bool rec_solve(int r, int c, const bool is_rotation_enabled, pair<int, int>& dimensions,
 	               vector<vector<Element>>& mat, vector<Element>& remaining_elements) const;
 };
 #endif

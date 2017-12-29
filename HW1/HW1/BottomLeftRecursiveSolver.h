@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __BottomRecursiveSolver_H_INCLUDED__
-#define __BottomRecursiveSolver_H_INCLUDED__   
+#ifndef __BOTTOMLEFTRECURSIVESOLVER_H_INCLUDED__
+#define __BOTTOMLEFTRECURSIVESOLVER_H_INCLUDED__   
 #include "BaseSolver.h"
 #include "Puzzle.h"
 
@@ -15,10 +15,10 @@ public:
 protected:
 	void sort_elements(vector<Element>& elements) override;
 	static bool can_be_placed(int r, int c, const pair<int, int>& dimensions, const vector<vector<Element>>& mat,
-	                   const Element& element);
+	                          const Element& element);
 private:
 
-	bool rec_solve(int r, const bool is_rotation_enabled, int c, pair<int, int>& dimensions,
+	bool rec_solve(int r, int c, const bool is_rotation_enabled, pair<int, int>& dimensions,
 	               vector<vector<Element>>& mat, vector<Element>& remaining_elements) const;
 };
 #endif
