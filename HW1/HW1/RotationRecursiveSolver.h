@@ -9,8 +9,8 @@ class RotationRecursiveSolver :
 public:
 	RotationRecursiveSolver();
 	~RotationRecursiveSolver();
-	bool solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
-	           vector<Element>& remaining_elements) override;
+	bool solve(pair<int, int>& dimentions, const bool is_rotation_enabled,
+	           vector<vector<Element>>& puzzle, vector<Element>& remaining_elements) override;
 
 private:
 

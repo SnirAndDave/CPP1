@@ -1,21 +1,21 @@
-﻿#pragma once
+#pragma once
 #ifndef __RECURSIVESOLVER_H_INCLUDED__
 #define __RECURSIVESOLVER_H_INCLUDED__   
 #include "BaseSolver.h"
 
-class TopRightRecursiveSolver :
+class TopLeftRecursiveSolver :
 	public BaseSolver
 {
 public:
-	TopRightRecursiveSolver();
-	~TopRightRecursiveSolver();
+	TopLeftRecursiveSolver();
+	~TopLeftRecursiveSolver();
 	bool solve(pair<int, int>& dimensions, const bool is_rotation_enabled,
 	           vector<vector<Element>>& puzzle, vector<Element>& remaining_elements) override;
-protected:
-	void sort_elements(vector<Element>& elements) override;
 	static bool can_be_placed(const int r, const int c, const pair<int, int>& dimensions,
 	                          const vector<vector<Element>>& mat,
 	                          const Element& element);
+protected:
+	void sort_elements(vector<Element>& elements) override;
 
 private:
 	bool rec_solve(int r, const bool is_rotation_enabled, int c, pair<int, int>& dimensions,

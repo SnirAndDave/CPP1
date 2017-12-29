@@ -3,11 +3,10 @@
 #include <algorithm>
 #include <memory>
 #include "BaseSolver.h"
-#include "RotationRecursiveSolver.h"
-#include "TopRecursiveSolver.h"
-#include "LeftRecursiveSolver.h"
-#include "RightRecursiveSolver.h"
-#include "BottomRecursiveSolver.h"
+#include "TopLeftRecursiveSolver.h"
+#include "LeftTopRecursiveSolver.h"
+#include "RightTopRecursiveSolver.h"
+#include "BottomLeftRecursiveSolver.h"
 #include <iostream>
 
 using namespace std;
@@ -102,7 +101,7 @@ void Puzzle::print_solution_to_console(const vector<vector<Element>>& matrix)
 		for (size_t c = 0; c < csize; c++)
 		{
 			cout << matrix[r][c]._id;
-			
+
 			if (c < csize - 1)
 			{
 				cout << " ";
@@ -276,11 +275,6 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimension
 vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 {
 	vector<shared_ptr<BaseSolver>> ret;
-	if (_is_rotation_enabled)
-	{
-		ret.push_back(make_shared<RotationRecursiveSolver>());
-		return ret;
-	}
 	double edges_count[4] = {0, 0, 0, 0};
 	for (const Element element : _elements)
 	{
@@ -312,11 +306,11 @@ vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 		}
 	}
 	const int min_edge_index = distance(edges_count, min_element(edges_count, edges_count + 4));
-	ret.push_back(make_shared<BottomRecursiveSolver>());
-	ret.push_back(make_shared<RightRecursiveSolver>());
-	ret.push_back(make_shared<TopRecursiveSolver>());
-	ret.push_back(make_shared<LeftRecursiveSolver>());
-	
+	ret.push_back(make_shared<BottomLeftRecursiveSolver>());
+	ret.push_back(make_shared<RightTopRecursiveSolver>());
+	ret.push_back(make_shared<TopLeftRecursiveSolver>());
+	ret.push_back(make_shared<LeftTopRecursiveSolver>());
+
 	return ret;
 }
 
@@ -326,7 +320,7 @@ void Puzzle::solve()
 	vector<pair<int, int>> valid_dimensions = get_valid_dimensions(dimensions);
 	vector<Corner> missing_corners = find_missing_corners();
 	const bool is_sum_zero = validate_sum_of_edges();
-	vector<thread> vec_threads(_thread_cnt-1);
+	vector<thread> vec_threads(_thread_cnt - 1);
 
 	if (!is_sum_zero || !missing_corners.empty() || valid_dimensions.empty())
 	{
@@ -339,12 +333,12 @@ void Puzzle::solve()
 		_finished = false;
 		_solved = false;
 		_solution.clear();
-		if(_thread_cnt == 1)
+		if (_thread_cnt == 1)
 		{
 			vector<Element> elements_copy = _elements;
 			vector<vector<Element>> mat = create_empty_mat(row_col_pair);
 
-			if (solvers[0]->solve(row_col_pair, mat, elements_copy))
+			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
 			{
 				print_solution(mat);
 				return;
@@ -352,7 +346,7 @@ void Puzzle::solve()
 			continue;
 		}
 
-		for(int i=0;i<_thread_cnt-1;i++)
+		for (int i = 0; i < _thread_cnt - 1; i++)
 		{
 			vec_threads[i] = thread(&Puzzle::thread_solve, this, row_col_pair, solvers[i]);
 		}
@@ -361,16 +355,15 @@ void Puzzle::solve()
 		_cv.wait(lock, [this] { return _finished; });
 		lock.unlock();
 
-		for(thread& t: vec_threads)
+		for (thread& t : vec_threads)
 		{
 			t.detach();
 		}
-		if(_solved)
+		if (_solved)
 		{
 			print_solution(_solution);
 			return;
 		}
-
 	}
 	this->_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
 }
@@ -378,7 +371,7 @@ void Puzzle::solve()
 void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
 {
 	unique_lock<mutex> lock(_mutex);
-	if(_finished)
+	if (_finished)
 	{
 		lock.unlock();
 		_cv.notify_all();
@@ -386,7 +379,7 @@ void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
 	}
 	_finished = true;
 	_solved = solved;
-	if(solved)
+	if (solved)
 	{
 		_solution = mat;
 	}
@@ -397,14 +390,14 @@ void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
 void Puzzle::thread_solve(pair<int, int> row_col_pair, const shared_ptr<BaseSolver>& solver)
 {
 	vector<Element> elements_copy;
-	for(Element element:_elements)
+	for (const Element element : _elements)
 	{
-		Element copy = element;
+		const Element copy = element;
 		elements_copy.push_back(copy);
 	}
 
 	vector<vector<Element>> mat = create_empty_mat(row_col_pair);
 
-	bool solved = solver->solve(row_col_pair, mat, elements_copy);
+	const bool solved = solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy);
 	set_solution(mat, solved);
 }
