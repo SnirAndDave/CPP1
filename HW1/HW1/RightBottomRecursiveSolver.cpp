@@ -14,11 +14,11 @@ RightBottomRecursiveSolver::~RightBottomRecursiveSolver()
 
 
 bool RightBottomRecursiveSolver::solve(pair<int, int>& dimensions, const bool is_rotation_enabled,
-                                       vector<vector<Element>>& puzzle, vector<Element>& remaining_elements)
+                                       vector<vector<Element>>& puzzle, vector<Element>& remaining_elements, const bool& finished)
 {
 	sort_elements(remaining_elements);
 	return rec_solve(dimensions.first - 1, dimensions.second - 1, is_rotation_enabled, dimensions, puzzle,
-	                 remaining_elements);
+	                 remaining_elements, finished);
 }
 
 void RightBottomRecursiveSolver::sort_elements(vector<Element>& elements)
@@ -71,8 +71,12 @@ bool RightBottomRecursiveSolver::can_be_placed(const int r, const int c, const p
 
 bool RightBottomRecursiveSolver::rec_solve(const int r, const int c, const bool is_rotation_enabled,
                                            pair<int, int>& dimensions,
-                                           vector<vector<Element>>& mat, vector<Element>& remaining_elements) const
+                                           vector<vector<Element>>& mat, vector<Element>& remaining_elements, const bool& finished) const
 {
+	if(finished)
+	{
+		throw exception();
+	}
 	const int iterations = is_rotation_enabled ? 4 : 1;
 	if (remaining_elements.empty() || c == -1)
 	{
@@ -97,7 +101,7 @@ bool RightBottomRecursiveSolver::rec_solve(const int r, const int c, const bool 
 				, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining _elements
 			const int next_r = r == 0 ? dimensions.first - 1 : r - 1;
 			const int next_c = next_r == dimensions.first - 1 ? c - 1 : c;
-			if (rec_solve(next_r, next_c, is_rotation_enabled, dimensions, mat, remaining_elements_copy))
+			if (rec_solve(next_r, next_c, is_rotation_enabled, dimensions, mat, remaining_elements_copy, finished))
 			{
 				return true;
 			}

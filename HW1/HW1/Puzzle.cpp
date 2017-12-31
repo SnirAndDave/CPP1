@@ -373,9 +373,9 @@ void Puzzle::solve()
 		{
 			vector<Element> elements_copy = _elements;
 			vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-			//shared_ptr<BaseSolver> my_solver = make_shared<BottomLeftRecursiveSolver>(); //FOR TESTING
-			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
-			//if (my_solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
+			//shared_ptr<BaseSolver> my_solver = make_shared<TopLeftRecursiveSolver>(); //FOR TESTING
+			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy, _finished))
+			//if (my_solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy, _finished))
 			{
 				print_solution(mat);
 				return;
@@ -394,7 +394,7 @@ void Puzzle::solve()
 
 		for (thread& t : vec_threads)
 		{
-			t.detach();
+			t.join();
 		}
 		if (_solved)
 		{
@@ -434,7 +434,10 @@ void Puzzle::thread_solve(pair<int, int> row_col_pair, const shared_ptr<BaseSolv
 	}
 
 	vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-
-	const bool solved = solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy);
+	try
+	{
+	const bool solved = solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy, _finished);
 	set_solution(mat, solved);
+	}catch(exception){
+	}
 }
