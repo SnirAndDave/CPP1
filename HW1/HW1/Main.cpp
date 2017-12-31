@@ -9,12 +9,12 @@ bool cmdOptionExists(vector<char*> vec, const std::string& option)
 
 int cmdOptionIndex(vector<char*> vec, const std::string& option)
 {
-	auto it = std::find(vec.begin(), vec.end(), option);
+	const auto it = std::find(vec.begin(), vec.end(), option);
 	if (it == vec.end())
 	{
 		return -1;
 	}
-	auto index = std::distance(vec.begin(), it);
+	const auto index = std::distance(vec.begin(), it);
 	return index;
 }
 
@@ -27,20 +27,20 @@ pair<string, string> parse_arguments(const int argc, char* argv[], int& thread_c
 {
 	const string rotate = "-rotate";
 	const string threads = "-threads";
-	vector<char*> argv_vec(argv, argv+argc);
+	vector<char*> argv_vec(argv, argv + argc);
 	if (argc == 3)
 	{
 		return pair<string, string>(argv_vec[1], argv_vec[2]);
 	}
-	if(cmdOptionExists(argv_vec, rotate))
+	if (cmdOptionExists(argv_vec, rotate))
 	{
 		is_rotation_enabled = true;
 		argv_vec.erase(std::find(argv_vec.begin(), argv_vec.end(), rotate));
 	}
-	if(cmdOptionExists(argv_vec, threads))
+	if (cmdOptionExists(argv_vec, threads))
 	{
-		int index = cmdOptionIndex(argv_vec, threads);
-		if(index + 1 >= int(argv_vec.size()))
+		const int index = cmdOptionIndex(argv_vec, threads);
+		if (index + 1 >= int(argv_vec.size()))
 		{
 			// -threads is the last argument
 			cout << "usage: -threads THREAD_COUNT" << endl;
@@ -48,9 +48,9 @@ pair<string, string> parse_arguments(const int argc, char* argv[], int& thread_c
 		}
 		try
 		{
-		thread_cnt = stoi(argv_vec[index + 1]);
+			thread_cnt = stoi(argv_vec[index + 1]);
 		}
-		catch(exception)
+		catch (exception)
 		{
 			throw invalid_argument(threads);
 		}
@@ -64,8 +64,10 @@ int main(const int argc, char* argv[])
 {
 	string fin_path;
 	string fout_path;
-	int thread_cnt = 5;
+
+	int thread_cnt = 4;
 	bool rotation_enabled = false;
+
 	try
 	{
 		const pair<string, string> pair = parse_arguments(argc, argv, thread_cnt, rotation_enabled);
@@ -74,10 +76,11 @@ int main(const int argc, char* argv[])
 	}
 	catch (exception ex)
 	{
-		cout << "failed to parse arguments with exception: "<< endl << ex.what() << endl;
+		cout << "failed to parse arguments with exception: " << endl << ex.what() << endl;
 		return 0;
 	}
-	cout << "solving puzzle from file: " << fin_path << " into file: " << fout_path << " with " << thread_cnt << " threads and rotation = " << rotation_enabled;
+	cout << "solving puzzle from file: " << fin_path << " into file: " << fout_path << " with " << thread_cnt <<
+		" threads and rotation = " << rotation_enabled;
 	ifstream fin(fin_path, ifstream::in);
 	if (!fin.good())
 	{

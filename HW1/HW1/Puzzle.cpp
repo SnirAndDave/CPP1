@@ -320,7 +320,7 @@ vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 		}
 		i = min_index;
 	}
-
+	cout << endl;
 	for (int& index : sorted_edges_order)
 	{
 		cout << index << " ";
@@ -373,9 +373,9 @@ void Puzzle::solve()
 		{
 			vector<Element> elements_copy = _elements;
 			vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-			shared_ptr<BaseSolver> my_solver = make_shared<BottomLeftRecursiveSolver>(); //FOR TESTING
-			//if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
-			if (my_solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
+			//shared_ptr<BaseSolver> my_solver = make_shared<BottomLeftRecursiveSolver>(); //FOR TESTING
+			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
+			//if (my_solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
 			{
 				print_solution(mat);
 				return;
