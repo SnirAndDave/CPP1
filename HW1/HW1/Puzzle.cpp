@@ -2,12 +2,6 @@
 #include <sstream>
 #include <algorithm>
 #include <memory>
-#include "BaseSolver.h"
-#include "RotationRecursiveSolver.h"
-#include "TopRecursiveSolver.h"
-#include "LeftRecursiveSolver.h"
-#include "RightRecursiveSolver.h"
-#include "BottomRecursiveSolver.h"
 #include <iostream>
 
 using namespace std;
@@ -102,7 +96,7 @@ void Puzzle::print_solution_to_console(const vector<vector<Element>>& matrix)
 		for (size_t c = 0; c < csize; c++)
 		{
 			cout << matrix[r][c]._id;
-			
+
 			if (c < csize - 1)
 			{
 				cout << " ";
@@ -276,11 +270,6 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimension
 vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 {
 	vector<shared_ptr<BaseSolver>> ret;
-	if (_is_rotation_enabled)
-	{
-		ret.push_back(make_shared<RotationRecursiveSolver>());
-		return ret;
-	}
 	double edges_count[4] = {0, 0, 0, 0};
 	for (const Element element : _elements)
 	{
@@ -311,12 +300,52 @@ vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 			edges_count[0] += 0.1;
 		}
 	}
-	const int min_edge_index = distance(edges_count, min_element(edges_count, edges_count + 4));
-	ret.push_back(make_shared<BottomRecursiveSolver>());
-	ret.push_back(make_shared<RightRecursiveSolver>());
-	ret.push_back(make_shared<TopRecursiveSolver>());
-	ret.push_back(make_shared<LeftRecursiveSolver>());
-	
+
+	int sorted_edges_order[4] = {-1, -1, -1, -1};
+	for (int& i : sorted_edges_order)
+	{
+		double min_elem = 1000.0;
+		int min_index = -1;
+		for (size_t j = 0; j < 4; j++)
+		{
+			if (find(begin(sorted_edges_order), end(sorted_edges_order), j) == end(sorted_edges_order))
+			{
+				//index not used yet
+				if (edges_count[j] <= min_elem)
+				{
+					min_elem = edges_count[j];
+					min_index = j;
+				}
+			}
+		}
+		i = min_index;
+	}
+	cout << endl;
+	for (int& index : sorted_edges_order)
+	{
+		cout << index << " ";
+		switch (index)
+		{
+		case 0:
+			ret.push_back(make_shared<LeftTopRecursiveSolver>());
+			ret.push_back(make_shared<LeftBottomRecursiveSolver>());
+			break;
+		case 1:
+			ret.push_back(make_shared<TopLeftRecursiveSolver>());
+			ret.push_back(make_shared<TopRightRecursiveSolver>());
+			break;
+		case 2:
+			ret.push_back(make_shared<RightTopRecursiveSolver>());
+			ret.push_back(make_shared<RightBottomRecursiveSolver>());
+			break;
+		default:
+			ret.push_back(make_shared<BottomLeftRecursiveSolver>());
+			ret.push_back(make_shared<BottomRightRecursiveSolver>());
+			break;
+		}
+	}
+	cout << endl;
+
 	return ret;
 }
 
@@ -326,7 +355,7 @@ void Puzzle::solve()
 	vector<pair<int, int>> valid_dimensions = get_valid_dimensions(dimensions);
 	vector<Corner> missing_corners = find_missing_corners();
 	const bool is_sum_zero = validate_sum_of_edges();
-	vector<thread> vec_threads(_thread_cnt-1);
+	vector<thread> vec_threads(_thread_cnt - 1);
 
 	if (!is_sum_zero || !missing_corners.empty() || valid_dimensions.empty())
 	{
@@ -334,17 +363,19 @@ void Puzzle::solve()
 	}
 
 	vector<shared_ptr<BaseSolver>> solvers = choose_solver();
+
 	for (pair<int, int> row_col_pair : valid_dimensions)
 	{
 		_finished = false;
 		_solved = false;
 		_solution.clear();
-		if(_thread_cnt == 1)
+		if (_thread_cnt == 1)
 		{
 			vector<Element> elements_copy = _elements;
 			vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-
-			if (solvers[0]->solve(row_col_pair, mat, elements_copy))
+			//shared_ptr<BaseSolver> my_solver = make_shared<BottomLeftRecursiveSolver>(); //FOR TESTING
+			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
+			//if (my_solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
 			{
 				print_solution(mat);
 				return;
@@ -352,7 +383,7 @@ void Puzzle::solve()
 			continue;
 		}
 
-		for(int i=0;i<_thread_cnt-1;i++)
+		for (int i = 0; i < _thread_cnt - 1; i++)
 		{
 			vec_threads[i] = thread(&Puzzle::thread_solve, this, row_col_pair, solvers[i]);
 		}
@@ -361,16 +392,15 @@ void Puzzle::solve()
 		_cv.wait(lock, [this] { return _finished; });
 		lock.unlock();
 
-		for(thread& t: vec_threads)
+		for (thread& t : vec_threads)
 		{
 			t.detach();
 		}
-		if(_solved)
+		if (_solved)
 		{
 			print_solution(_solution);
 			return;
 		}
-
 	}
 	this->_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
 }
@@ -378,7 +408,7 @@ void Puzzle::solve()
 void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
 {
 	unique_lock<mutex> lock(_mutex);
-	if(_finished)
+	if (_finished)
 	{
 		lock.unlock();
 		_cv.notify_all();
@@ -386,7 +416,7 @@ void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
 	}
 	_finished = true;
 	_solved = solved;
-	if(solved)
+	if (solved)
 	{
 		_solution = mat;
 	}
@@ -397,14 +427,14 @@ void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
 void Puzzle::thread_solve(pair<int, int> row_col_pair, const shared_ptr<BaseSolver>& solver)
 {
 	vector<Element> elements_copy;
-	for(Element element:_elements)
+	for (const Element element : _elements)
 	{
-		Element copy = element;
+		const Element copy = element;
 		elements_copy.push_back(copy);
 	}
 
 	vector<vector<Element>> mat = create_empty_mat(row_col_pair);
 
-	bool solved = solver->solve(row_col_pair, mat, elements_copy);
+	const bool solved = solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy);
 	set_solution(mat, solved);
 }

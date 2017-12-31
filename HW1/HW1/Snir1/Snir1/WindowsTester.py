@@ -106,7 +106,7 @@ print("start:")
 for x in range(1000):
     puzzle = set_puzzle()
     export_puzzle(puzzle)
-    p = Popen(['../Debug/Snir1.exe', 'a', 'b'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p = Popen(['C:/Users/David/source/repos/CPP1/HW1/HW1/Snir1/CPP1/David5/Debug/David5.exe', 'a', 'b'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, err = p.communicate()
     print(err)
     check_output_file(puzzle)

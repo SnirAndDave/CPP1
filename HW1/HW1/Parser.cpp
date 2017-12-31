@@ -17,7 +17,7 @@ bool Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_ele
 	fill_n(ids, rel_size, false); //initialize with false
 	bool double_id = false;
 
-	for (const auto & element : puzzle._elements)
+	for (const auto& element : puzzle._elements)
 	{
 		// assume that each _id has value < puzzle._size (it is checked)
 		if (ids[element._id])
