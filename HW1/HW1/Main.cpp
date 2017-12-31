@@ -64,7 +64,7 @@ int main(const int argc, char* argv[])
 {
 	string fin_path;
 	string fout_path;
-	int thread_cnt = 4;
+	int thread_cnt = 5;
 	bool rotation_enabled = false;
 	try
 	{

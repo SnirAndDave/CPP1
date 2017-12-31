@@ -10,8 +10,8 @@ RotationRecursiveSolver::RotationRecursiveSolver()
 RotationRecursiveSolver::~RotationRecursiveSolver()
 = default;
 
-bool RotationRecursiveSolver::solve(pair<int, int>& dimentions, vector<vector<Element>>& puzzle,
-                                    vector<Element>& remaining_elements)
+bool RotationRecursiveSolver::solve(pair<int, int>& dimentions, const bool is_rotation_enabled,
+                                    vector<vector<Element>>& puzzle, vector<Element>& remaining_elements)
 {
 	return rec_solve(0, 0, dimentions, puzzle, remaining_elements);
 }
