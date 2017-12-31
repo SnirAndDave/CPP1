@@ -363,6 +363,7 @@ void Puzzle::solve()
 	}
 
 	vector<shared_ptr<BaseSolver>> solvers = choose_solver();
+
 	for (pair<int, int> row_col_pair : valid_dimensions)
 	{
 		_finished = false;
@@ -372,8 +373,9 @@ void Puzzle::solve()
 		{
 			vector<Element> elements_copy = _elements;
 			vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-
-			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
+			shared_ptr<BaseSolver> my_solver = make_shared<BottomLeftRecursiveSolver>(); //FOR TESTING
+			//if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
+			if (my_solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
 			{
 				print_solution(mat);
 				return;

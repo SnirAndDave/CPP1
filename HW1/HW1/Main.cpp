@@ -33,7 +33,7 @@ int main(const int argc, char* argv[])
 {
 	string fin_path;
 	string fout_path;
-	int thread_cnt = 5;
+	int thread_cnt = 1;
 	try
 	{
 		const pair<string, string> pair = parse_arguments(argc, argv, thread_cnt);
