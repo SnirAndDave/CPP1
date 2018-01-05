@@ -1,6 +1,7 @@
 #include "Parser.h"
 #include <iostream>
 #include <iterator>
+#include <cassert>
 
 bool cmdOptionExists(vector<char*> vec, const std::string& option)
 {
@@ -44,14 +45,16 @@ pair<string, string> parse_arguments(const int argc, char* argv[], int& thread_c
 		{
 			// -threads is the last argument
 			cout << "usage: -threads THREAD_COUNT" << endl;
+
 			throw invalid_argument(threads);
 		}
 		try
 		{
 			thread_cnt = stoi(argv_vec[index + 1]);
 		}
-		catch (exception)
+		catch (exception ex)
 		{
+			cout << "usage: -threads THREAD_COUNT" << endl;
 			throw invalid_argument(threads);
 		}
 		argv_vec.erase(argv_vec.begin() + index + 1);
@@ -68,6 +71,8 @@ int main(const int argc, char* argv[])
 	int thread_cnt = 4;
 	bool rotation_enabled = false;
 
+	ParserErrorCode ec = ParserErrorCode::no_errors;
+
 	try
 	{
 		const pair<string, string> pair = parse_arguments(argc, argv, thread_cnt, rotation_enabled);
@@ -76,28 +81,36 @@ int main(const int argc, char* argv[])
 	}
 	catch (exception ex)
 	{
-		cout << "failed to parse arguments with exception: " << endl << ex.what() << endl;
+		ec = ParserErrorCode::parse_arguments_error;
+		cout << make_error_code(ec).message() << endl << "with exception: " << ex.what() << endl;
 		return 0;
 	}
 	cout << "solving puzzle from file: " << fin_path << " into file: " << fout_path << " with " << thread_cnt <<
-		" threads and rotation = " << rotation_enabled;
+		" threads and rotation = " << rotation_enabled << endl;
 	ifstream fin(fin_path, ifstream::in);
 	if (!fin.good())
 	{
-		cout << "error: opening file " + string(fin_path) + " failed";
+		ec = ParserErrorCode::open_file_error;
+		cout << make_error_code(ec).message() << endl << "opening file " + string(fin_path) + " failed";
 		return 0;
 	}
 
 	ofstream fout(fout_path, ofstream::out);
-	Parser parser;
+	if (!fout.good())
+	{
+		ec = ParserErrorCode::open_file_error;
+		cout << make_error_code(ec).message() << endl << "opening or creating file " + string(fout_path) + " failed";
+		return 0;
+	}
+	const Parser parser;
 	Puzzle puzzle(fout, rotation_enabled, thread_cnt);
-	if (!parser.parse(fin, puzzle, fout))
+	if (!parser.parse(fin, puzzle, fout, &ec))
 	{
 		fin.close();
 		fout.close();
 		return 0;
 	}
-
+	assert(ec == ParserErrorCode::no_errors);
 	puzzle.solve();
 	fin.close();
 	fout.close();

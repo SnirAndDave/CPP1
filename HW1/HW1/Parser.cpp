@@ -9,6 +9,60 @@
 
 using namespace std;
 
+namespace
+{
+	struct ParserErrorCategory : std::error_category
+	{
+		const char* name() const noexcept override;
+		std::string message(int env) const override;
+	};
+
+	const char* ParserErrorCategory::name() const noexcept
+	{
+		return "Parse Errors";
+	}
+
+	std::string ParserErrorCategory::message(int env) const
+	{
+		switch (static_cast<ParserErrorCode>(env))
+		{
+		case ParserErrorCode::parse_arguments_error:
+			return "could not parse arguments properly";
+
+		case ParserErrorCode::open_file_error:
+			return "Could not open file";
+
+		case ParserErrorCode::invalid_number_of_elements_error:
+			return "invalid number of elements in first line";
+
+		case ParserErrorCode::missing_elements_error:
+			return "missing elements in input file";
+
+		case ParserErrorCode::wrong_id_error:
+			return "puzzle of given size cannot have this ID";
+
+		case ParserErrorCode::bad_format_id_error:
+			return "invalid element ID";
+
+		case ParserErrorCode::bad_format_data_error:
+			return "element received with invalid data";
+
+		case ParserErrorCode::duplicate_ids_error:
+			return "input contains duplicate IDs";
+
+		default:
+			return "(unrecognized error)";
+		}
+	}
+
+	const ParserErrorCategory theParserErrorCategory{};
+}
+
+std::error_code make_error_code(ParserErrorCode e)
+{
+	return {static_cast<int>(e), theParserErrorCategory};
+}
+
 
 bool Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_elements)
 {
@@ -38,7 +92,7 @@ bool Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_ele
 
 bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fout, vector<int>& missing_elements,
                                              vector<int>& wrong_ids, vector<string>& bad_format_lines,
-                                             vector<string>& bad_format_ids) const
+                                             vector<string>& bad_format_ids, ParserErrorCode* ec) const
 {
 	bool is_valid = true;
 	const bool double_id = get_missing_elements(puzzle, missing_elements);
@@ -50,12 +104,13 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 		is_valid = false;
 
 		get_ids_with_comma_delimiter(missing_elements, oss);
+		*ec = ParserErrorCode::missing_elements_error;
 		fout << oss.str() << endl;
 	}
 	if (!wrong_ids.empty())
 	{
 		ostringstream oss;
-		oss << "Puzzle of _size " << puzzle._size << " cannot have the following IDs: ";
+		oss << "Puzzle of size " << puzzle._size << " cannot have the following IDs: ";
 		is_valid = false;
 
 		get_ids_with_comma_delimiter(wrong_ids, oss);
@@ -89,7 +144,8 @@ bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fou
 	if (double_id)
 	{
 		is_valid = false;
-		fout << "Error: Input contains duplicate IDs" << endl;
+		*ec = ParserErrorCode::duplicate_ids_error;
+		fout << "Error: " << make_error_code(*ec).message() << endl;
 	}
 	return is_valid;
 }
@@ -103,7 +159,7 @@ void Parser::get_ids_with_comma_delimiter(vector<int>& elements, ostringstream& 
 	oss << elements.back();
 }
 
-bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout) const
+bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout, ParserErrorCode* ec) const
 {
 	string line;
 	vector<int> missing_elements;
@@ -115,14 +171,16 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout) const
 	{
 		getline(fin, line);
 		clean_spaces(line);
-		puzzle._size = process_first_line(line, msg);
+		puzzle._size = process_first_line(line, msg, ec);
 		while (getline(fin, line))
 		{
-			this->process_line(line, wrong_ids, bad_format_lines, bad_format_ids, puzzle._size, puzzle._elements);
+			this->process_line(line, wrong_ids, bad_format_lines, bad_format_ids, puzzle._size, puzzle._elements, ec);
 		}
 
-		return check_if_valid_and_report_error(puzzle, fout, missing_elements, wrong_ids, bad_format_lines, bad_format_ids);
+		return check_if_valid_and_report_error(puzzle, fout, missing_elements, wrong_ids, bad_format_lines, bad_format_ids,
+		                                       ec);
 	}
+		//not using actual exception, msg already contains the exception message and will print to output file
 	catch (exception ex)
 	{
 		fout << msg << endl;
@@ -130,13 +188,14 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout) const
 	}
 }
 
-int Parser::process_first_line(const string& line, string& msg) const
+int Parser::process_first_line(const string& line, string& msg, ParserErrorCode* ec) const
 {
 	vector<string> delimited = split(line, '=');
 	const string num = delimited[1];
 	if (!is_digits(num))
 	{
-		msg = "invalid number of _elements";
+		*ec = ParserErrorCode::invalid_number_of_elements_error;
+		msg = make_error_code(*ec).message();
 		throw exception();
 	}
 	return stoi(num);
@@ -146,13 +205,11 @@ int Parser::parse_edge(const string& edge, string& msg) const
 {
 	if (!is_digits_with_minus(edge))
 	{
-		msg = "edge is not a number";
 		throw exception();
 	}
 	const int parsed = stoi(edge);
 	if (parsed < -1 || parsed > 1)
 	{
-		msg = "edge is not valid number";
 		throw exception();
 	}
 	return parsed;
@@ -176,7 +233,7 @@ bool Parser::is_digits_with_minus(const string& str)
 void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
                           vector<string>& bad_format_ids,
                           const int elements_count,
-                          vector<Element>& elements) const
+                          vector<Element>& elements, ParserErrorCode* ec) const
 {
 	vector<string> delimited = split(line, ' ');
 
@@ -184,6 +241,7 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 
 	if (!is_digits(delimited[0]))
 	{
+		*ec = ParserErrorCode::bad_format_id_error;
 		bad_format_ids.push_back(delimited[0]);
 		return;
 	}
@@ -192,6 +250,7 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 
 	if (id > elements_count || id <= 0)
 	{
+		*ec = ParserErrorCode::wrong_id_error;
 		wrong_ids.push_back(id);
 		return;
 	}
@@ -206,9 +265,12 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 		const Element el(id, left, top, right, bottom);
 		elements.push_back(el);
 	}
+		//not using actual exception, adding bad line to vector and message will be printed later
 	catch (exception ex)
 	{
 		bad_format_lines.push_back(line);
+		*ec = ParserErrorCode::bad_format_data_error;
+		msg = make_error_code(*ec).message();
 		const Element el(id, 0, 0, 0, 0);
 		elements.push_back(el);
 	}
