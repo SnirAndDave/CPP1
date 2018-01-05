@@ -12,6 +12,7 @@ enum class ParserErrorCode
 	no_errors,
 	open_file_error,
 	parse_arguments_error,
+	invalid_arguments_error,
 	invalid_number_of_elements_error,
 	missing_elements_error,
 	wrong_id_error,

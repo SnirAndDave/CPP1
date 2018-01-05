@@ -3,11 +3,17 @@
 #include <iterator>
 #include <cassert>
 
+/**
+ * Checks if given flag exists in cmd line
+ */
 bool cmdOptionExists(vector<char*> vec, const std::string& option)
 {
 	return std::find(vec.begin(), vec.end(), option) != vec.end();
 }
 
+/**
+ * Returns index of given flag in cmd line
+ */
 int cmdOptionIndex(vector<char*> vec, const std::string& option)
 {
 	const auto it = std::find(vec.begin(), vec.end(), option);
@@ -24,6 +30,9 @@ char* getCmdOption(vector<char*> vec, const std::string& option)
 	return vec[cmdOptionIndex(vec, option)];
 }
 
+/**
+ * Parse arguments from command line. Handles the flags -rotate and -threads
+ */
 pair<string, string> parse_arguments(const int argc, char* argv[], int& thread_cnt, bool& is_rotation_enabled)
 {
 	const string rotate = "-rotate";
@@ -73,6 +82,7 @@ int main(const int argc, char* argv[])
 
 	ParserErrorCode ec = ParserErrorCode::no_errors;
 
+	//1. Try to parse cmd line first
 	try
 	{
 		const pair<string, string> pair = parse_arguments(argc, argv, thread_cnt, rotation_enabled);
@@ -87,6 +97,7 @@ int main(const int argc, char* argv[])
 	}
 	cout << "solving puzzle from file: " << fin_path << " into file: " << fout_path << " with " << thread_cnt <<
 		" threads and rotation = " << rotation_enabled << endl;
+
 	ifstream fin(fin_path, ifstream::in);
 	if (!fin.good())
 	{
@@ -104,6 +115,8 @@ int main(const int argc, char* argv[])
 	}
 	const Parser parser;
 	Puzzle puzzle(fout, rotation_enabled, thread_cnt);
+
+	//2. Try to parse input files
 	if (!parser.parse(fin, puzzle, fout, &ec))
 	{
 		fin.close();
@@ -111,6 +124,7 @@ int main(const int argc, char* argv[])
 		return 0;
 	}
 	assert(ec == ParserErrorCode::no_errors);
+	//3. Solve puzzle
 	puzzle.solve();
 	fin.close();
 	fout.close();

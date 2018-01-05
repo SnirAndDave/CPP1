@@ -63,7 +63,10 @@ std::error_code make_error_code(ParserErrorCode e)
 	return {static_cast<int>(e), theParserErrorCategory};
 }
 
-
+/**
+ * Checks if all IDs exist in elements, from 1 to NumElements given in first line
+ * Adds missing elements to a vector to be used later
+ */
 bool Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_elements)
 {
 	const int rel_size = puzzle._size + 1;
@@ -90,6 +93,10 @@ bool Parser::get_missing_elements(const Puzzle& puzzle, vector<int>& missing_ele
 	return double_id;
 }
 
+/**
+ * This function checks all vectors with 'bad' info, in the order that is instructed from Ex 1.
+ * Responsible for printing the errors into output file, updating error code, and update calling function that input is valid or not
+ */
 bool Parser::check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fout, vector<int>& missing_elements,
                                              vector<int>& wrong_ids, vector<string>& bad_format_lines,
                                              vector<string>& bad_format_ids, ParserErrorCode* ec) const
@@ -171,12 +178,15 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout, ParserErrorCod
 	{
 		getline(fin, line);
 		clean_spaces(line);
+		//1. Parse first line and receive puzzle size
 		puzzle._size = process_first_line(line, msg, ec);
 		while (getline(fin, line))
 		{
+			//2. Parse every line and update all 'bad' info vectors + puzzle elements
 			this->process_line(line, wrong_ids, bad_format_lines, bad_format_ids, puzzle._size, puzzle._elements, ec);
 		}
 
+		//3. Check if all is ok and program can start solving puzzle
 		return check_if_valid_and_report_error(puzzle, fout, missing_elements, wrong_ids, bad_format_lines, bad_format_ids,
 		                                       ec);
 	}
@@ -187,6 +197,7 @@ bool Parser::parse(ifstream& fin, Puzzle& puzzle, ofstream& fout, ParserErrorCod
 		return false;
 	}
 }
+
 
 int Parser::process_first_line(const string& line, string& msg, ParserErrorCode* ec) const
 {
@@ -220,6 +231,9 @@ bool Parser::is_digits(const string& str)
 	return all_of(str.begin(), str.end(), ::isdigit);
 }
 
+/**
+ * Checks if str is '-<digits>'
+ */
 bool Parser::is_digits_with_minus(const string& str)
 {
 	if (str[0] == '-')
@@ -230,6 +244,10 @@ bool Parser::is_digits_with_minus(const string& str)
 	return all_of(str.begin(), str.end(), ::isdigit);
 }
 
+/**
+ * Parses each line of element and gets element's ID and edges.
+ * Inserts into vectors whenever an error appears in the input, these vectors are used later
+ */
 void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<string>& bad_format_lines,
                           vector<string>& bad_format_ids,
                           const int elements_count,
@@ -239,6 +257,7 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 
 	string msg;
 
+	//check element id format
 	if (!is_digits(delimited[0]))
 	{
 		*ec = ParserErrorCode::bad_format_id_error;
@@ -248,6 +267,7 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 
 	const int id = stoi(delimited[0]);
 
+	//check if possible id with puzzle size
 	if (id > elements_count || id <= 0)
 	{
 		*ec = ParserErrorCode::wrong_id_error;
@@ -255,6 +275,7 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 		return;
 	}
 
+	//parse element's edges
 	try
 	{
 		const int left = parse_edge(delimited[1], msg);
@@ -281,7 +302,9 @@ void Parser::clean_spaces(string& str)
 	str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
 }
 
-//splits string s to a vector
+/**
+ *splits string s to a vector
+ **/
 vector<string> Parser::split(const string& s, const char delim) const
 {
 	vector<string> elems;
