@@ -30,19 +30,28 @@
     <ClCompile Include="..\..\BaseSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\RotationRecursiveSolver.cpp">
+    <ClCompile Include="..\..\TopRightRecursiveSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\LeftRecursiveSolver.cpp">
+    <ClCompile Include="..\..\BottomLeftRecursiveSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\RightRecursiveSolver.cpp">
+    <ClCompile Include="..\..\BottomRightRecursiveSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\BottomRecursiveSolver.cpp">
+    <ClCompile Include="..\..\LeftBottomRecursiveSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\TopRecursiveSolver.cpp">
+    <ClCompile Include="..\..\LeftTopRecursiveSolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\RightBottomRecursiveSolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\RightTopRecursiveSolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TopLeftRecursiveSolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,19 +68,28 @@
     <ClInclude Include="..\..\BaseSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\RotationRecursiveSolver.h">
+    <ClInclude Include="..\..\BottomRightRecursiveSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\LeftRecursiveSolver.h">
+    <ClInclude Include="..\..\LeftBottomRecursiveSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\RightRecursiveSolver.h">
+    <ClInclude Include="..\..\LeftTopRecursiveSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\BottomRecursiveSolver.h">
+    <ClInclude Include="..\..\RightBottomRecursiveSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\TopRecursiveSolver.h">
+    <ClInclude Include="..\..\RightTopRecursiveSolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TopLeftRecursiveSolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TopRightRecursiveSolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BottomLeftRecursiveSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
