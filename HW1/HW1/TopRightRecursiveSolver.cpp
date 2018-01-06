@@ -12,9 +12,6 @@ TopRightRecursiveSolver::TopRightRecursiveSolver()
 TopRightRecursiveSolver::~TopRightRecursiveSolver()
 = default;
 
-/**
- * sorts the unused elements, and calls rec_solver while giving start coordinates
- */
 bool TopRightRecursiveSolver::solve(pair<int, int>& dimensions, const bool is_rotation_enabled,
                                     vector<vector<Element>>& puzzle, vector<Element>& remaining_elements, const bool& finished)
 {
@@ -22,10 +19,7 @@ bool TopRightRecursiveSolver::solve(pair<int, int>& dimensions, const bool is_ro
 	return rec_solve(0, dimensions.second - 1, is_rotation_enabled, dimensions, puzzle, remaining_elements, finished);
 }
 
-/**
- * Sorts the unused elements to make the solver run quicker
- * It takes into consideration the relevant edges with the start or end of the puzzle frame side
- */
+
 void TopRightRecursiveSolver::sort_elements(vector<Element>& elements)
 {
 	sort(elements.begin(), elements.end(), [](const Element& a, const Element& b) -> bool
