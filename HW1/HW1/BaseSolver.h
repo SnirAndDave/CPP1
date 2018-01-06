@@ -13,7 +13,7 @@ public:
 	BaseSolver();
 	virtual ~BaseSolver();
 	virtual bool solve(pair<int, int>& dimensions, const bool is_rotation_enabled,
-	                   vector<vector<Element>>& puzzle, vector<Element>& remaining_elements) = 0;
+	                   vector<vector<Element>>& puzzle, vector<Element>& remaining_elements, const bool& finished) = 0;
 protected:
 	virtual void sort_elements(vector<Element>& elements);
 };

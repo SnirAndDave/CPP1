@@ -2,11 +2,12 @@
 #include <iostream>
 #include <iterator>
 #include <cassert>
+#include <algorithm>
 
 /**
  * Checks if given flag exists in cmd line
  */
-bool cmdOptionExists(vector<char*> vec, const std::string& option)
+bool cmdOptionExists(vector<string> vec, const std::string& option)
 {
 	return std::find(vec.begin(), vec.end(), option) != vec.end();
 }
@@ -14,7 +15,7 @@ bool cmdOptionExists(vector<char*> vec, const std::string& option)
 /**
  * Returns index of given flag in cmd line
  */
-int cmdOptionIndex(vector<char*> vec, const std::string& option)
+int cmdOptionIndex(vector<string> vec, const std::string& option)
 {
 	const auto it = std::find(vec.begin(), vec.end(), option);
 	if (it == vec.end())
@@ -25,7 +26,7 @@ int cmdOptionIndex(vector<char*> vec, const std::string& option)
 	return index;
 }
 
-char* getCmdOption(vector<char*> vec, const std::string& option)
+string getCmdOption(vector<string> vec, const std::string& option)
 {
 	return vec[cmdOptionIndex(vec, option)];
 }
@@ -37,7 +38,7 @@ pair<string, string> parse_arguments(const int argc, char* argv[], int& thread_c
 {
 	const string rotate = "-rotate";
 	const string threads = "-threads";
-	vector<char*> argv_vec(argv, argv + argc);
+	vector<string> argv_vec(argv, argv + argc);
 	if (argc == 3)
 	{
 		return pair<string, string>(argv_vec[1], argv_vec[2]);

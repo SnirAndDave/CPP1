@@ -4,6 +4,7 @@
 #include <memory>
 #include <iostream>
 #include <cassert>
+#include <thread>
 
 using namespace std;
 
@@ -393,7 +394,7 @@ void Puzzle::solve()
 			vector<Element> elements_copy = _elements;
 			vector<vector<Element>> mat = create_empty_mat(row_col_pair);
 			//3. Try to solve for this dimensions
-			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy))
+			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy, _finished))
 			{
 				print_solution(mat);
 				return;
@@ -415,7 +416,7 @@ void Puzzle::solve()
 		//TODO: Snir please comment here after you fix
 		for (thread& t : vec_threads)
 		{
-			t.detach();
+			t.join();
 		}
 		if (_solved)
 		{
@@ -463,7 +464,10 @@ void Puzzle::thread_solve(pair<int, int> row_col_pair, const shared_ptr<BaseSolv
 	}
 
 	vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-
-	const bool solved = solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy);
+	try
+	{
+	const bool solved = solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy, _finished);
 	set_solution(mat, solved);
+	}catch(exception){
+	}
 }

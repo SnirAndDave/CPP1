@@ -7,6 +7,7 @@
 #include "BaseSolver.h"
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include "TopLeftRecursiveSolver.h"
 #include "TopRightRecursiveSolver.h"
 #include "LeftTopRecursiveSolver.h"

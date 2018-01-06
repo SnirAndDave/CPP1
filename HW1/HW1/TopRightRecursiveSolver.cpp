@@ -16,10 +16,10 @@ TopRightRecursiveSolver::~TopRightRecursiveSolver()
  * sorts the unused elements, and calls rec_solver while giving start coordinates
  */
 bool TopRightRecursiveSolver::solve(pair<int, int>& dimensions, const bool is_rotation_enabled,
-                                    vector<vector<Element>>& puzzle, vector<Element>& remaining_elements)
+                                    vector<vector<Element>>& puzzle, vector<Element>& remaining_elements, const bool& finished)
 {
 	sort_elements(remaining_elements);
-	return rec_solve(0, dimensions.second - 1, is_rotation_enabled, dimensions, puzzle, remaining_elements);
+	return rec_solve(0, dimensions.second - 1, is_rotation_enabled, dimensions, puzzle, remaining_elements, finished);
 }
 
 /**
@@ -82,8 +82,12 @@ bool TopRightRecursiveSolver::can_be_placed(const int r, const int c, const pair
  */
 bool TopRightRecursiveSolver::rec_solve(const int r, const int c, const bool is_rotation_enabled,
                                         pair<int, int>& dimensions,
-                                        vector<vector<Element>>& mat, vector<Element>& remaining_elements) const
+                                        vector<vector<Element>>& mat, vector<Element>& remaining_elements, const bool& finished) const
 {
+	if (finished)
+	{
+		throw exception();
+	}
 	const int iterations = is_rotation_enabled ? 4 : 1;
 	if (remaining_elements.empty() || r == dimensions.first) //end of recursion -> puzzle solved!
 	{
@@ -108,7 +112,7 @@ bool TopRightRecursiveSolver::rec_solve(const int r, const int c, const bool is_
 				, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining _elements
 			const int next_c = c == 0 ? dimensions.second - 1 : c - 1;
 			const int next_r = next_c == dimensions.second - 1 ? r + 1 : r; //determine the location of the next piece
-			if (rec_solve(next_r, next_c, is_rotation_enabled, dimensions, mat, remaining_elements_copy))
+			if (rec_solve(next_r, next_c, is_rotation_enabled, dimensions, mat, remaining_elements_copy, finished))
 			{
 				return true;
 			}
