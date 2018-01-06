@@ -320,11 +320,11 @@ vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 		}
 		i = min_index;
 	}
-	cout << endl;
+	// cout << endl;
 	//3. Populate vector with solvers according to sorted indices
 	for (int& index : sorted_edges_order)
 	{
-		cout << index << " ";
+		// cout << index << " ";
 		switch (index)
 		{
 		case 0:
@@ -408,12 +408,12 @@ void Puzzle::solve()
 			vec_threads[i] = thread(&Puzzle::thread_solve, this, row_col_pair, solvers[i]);
 		}
 
-		//TODO: Snir please comment here after you fix
+		//waiting for one of the threads to signal finish
 		unique_lock<mutex> lock(_mutex);
 		_cv.wait(lock, [this] { return _finished; });
 		lock.unlock();
 
-		//TODO: Snir please comment here after you fix
+		//waiting for other threads to discover that puzzle was solved and terminate
 		for (thread& t : vec_threads)
 		{
 			t.join();

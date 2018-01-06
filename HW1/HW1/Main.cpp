@@ -4,91 +4,15 @@
 #include <cassert>
 #include <algorithm>
 
-/**
- * Checks if given flag exists in cmd line
- */
-bool cmdOptionExists(vector<string> vec, const std::string& option)
-{
-	return std::find(vec.begin(), vec.end(), option) != vec.end();
-}
-
-/**
- * Returns index of given flag in cmd line
- */
-int cmdOptionIndex(vector<string> vec, const std::string& option)
-{
-	const auto it = std::find(vec.begin(), vec.end(), option);
-	if (it == vec.end())
-	{
-		return -1;
-	}
-	const auto index = std::distance(vec.begin(), it);
-	return index;
-}
-
-string getCmdOption(vector<string> vec, const std::string& option)
-{
-	return vec[cmdOptionIndex(vec, option)];
-}
-
-/**
- * Parse arguments from command line. Handles the flags -rotate and -threads
- */
-pair<string, string> parse_arguments(const int argc, char* argv[], int& thread_cnt, bool& is_rotation_enabled)
-{
-	const string rotate = "-rotate";
-	const string threads = "-threads";
-	vector<string> argv_vec(argv, argv + argc);
-	if (argc == 3)
-	{
-		return pair<string, string>(argv_vec[1], argv_vec[2]);
-	}
-	if (cmdOptionExists(argv_vec, rotate))
-	{
-		is_rotation_enabled = true;
-		argv_vec.erase(std::find(argv_vec.begin(), argv_vec.end(), rotate));
-	}
-	if (cmdOptionExists(argv_vec, threads))
-	{
-		const int index = cmdOptionIndex(argv_vec, threads);
-		if (index + 1 >= int(argv_vec.size()))
-		{
-			// -threads is the last argument
-			cout << "usage: -threads THREAD_COUNT" << endl;
-
-			throw invalid_argument(threads);
-		}
-		try
-		{
-			thread_cnt = stoi(argv_vec[index + 1]);
-		}
-		catch (exception ex)
-		{
-			cout << "usage: -threads THREAD_COUNT" << endl;
-			throw invalid_argument(threads);
-		}
-		argv_vec.erase(argv_vec.begin() + index + 1);
-		argv_vec.erase(argv_vec.begin() + index);
-	}
-	return pair<string, string>(argv_vec[1], argv_vec[2]);
-}
-
 int main(const int argc, char* argv[])
 {
-	string fin_path;
-	string fout_path;
-
-	int thread_cnt = 4;
-	bool rotation_enabled = false;
-
 	ParserErrorCode ec = ParserErrorCode::no_errors;
-
+	
 	//1. Try to parse cmd line first
+	Parser parser;
 	try
 	{
-		const pair<string, string> pair = parse_arguments(argc, argv, thread_cnt, rotation_enabled);
-		fin_path = pair.first;
-		fout_path = pair.second;
+		parser.parse_arguments(argc, argv);
 	}
 	catch (exception ex)
 	{
@@ -96,26 +20,25 @@ int main(const int argc, char* argv[])
 		cout << make_error_code(ec).message() << endl << "with exception: " << ex.what() << endl;
 		return 0;
 	}
-	cout << "solving puzzle from file: " << fin_path << " into file: " << fout_path << " with " << thread_cnt <<
-		" threads and rotation = " << rotation_enabled << endl;
+	cout << "solving puzzle from file: " << parser._fin_path << " into file: " << parser._fout_path << " with " << parser._thread_cnt <<
+		" threads and rotation = " << parser._rotation_enabled << endl;
 
-	ifstream fin(fin_path, ifstream::in);
+	ifstream fin(parser._fin_path, ifstream::in);
 	if (!fin.good())
 	{
 		ec = ParserErrorCode::open_file_error;
-		cout << make_error_code(ec).message() << endl << "opening file " + string(fin_path) + " failed";
+		cout << make_error_code(ec).message() << endl << "opening file " + string(parser._fin_path) + " failed";
 		return 0;
 	}
 
-	ofstream fout(fout_path, ofstream::out);
+	ofstream fout(parser._fout_path, ofstream::out);
 	if (!fout.good())
 	{
 		ec = ParserErrorCode::open_file_error;
-		cout << make_error_code(ec).message() << endl << "opening or creating file " + string(fout_path) + " failed";
+		cout << make_error_code(ec).message() << endl << "opening or creating file " + string(parser._fout_path) + " failed";
 		return 0;
 	}
-	const Parser parser;
-	Puzzle puzzle(fout, rotation_enabled, thread_cnt);
+	Puzzle puzzle(fout, parser._rotation_enabled, parser._thread_cnt);
 
 	//2. Try to parse input files
 	if (!parser.parse(fin, puzzle, fout, &ec))

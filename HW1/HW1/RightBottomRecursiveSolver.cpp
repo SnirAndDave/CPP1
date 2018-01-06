@@ -45,9 +45,8 @@ void RightBottomRecursiveSolver::sort_elements(vector<Element>& elements)
 	});
 }
 
-bool RightBottomRecursiveSolver::can_be_placed(const int r, const int c,
-                                               const vector<vector<Element>>& mat,
-                                               const Element& element)
+bool RightBottomRecursiveSolver::can_be_placed(const int r, const int c, const vector<vector<Element>>& mat,
+	const Element& element, pair<int, int>) const
 {
 	if (Puzzle::get_element(mat, r + 1, c)._top + element._bottom != 0)
 	{
@@ -68,45 +67,16 @@ bool RightBottomRecursiveSolver::can_be_placed(const int r, const int c,
 	return true;
 }
 
-
-bool RightBottomRecursiveSolver::rec_solve(const int r, const int c, const bool is_rotation_enabled,
-                                           pair<int, int>& dimensions,
-                                           vector<vector<Element>>& mat, vector<Element>& remaining_elements, const bool& finished) const
+bool RightBottomRecursiveSolver::halt_condition(const int, const int c, pair<int, int>) const
 {
-	if(finished)
-	{
-		throw exception();
-	}
-	const int iterations = is_rotation_enabled ? 4 : 1;
-	if (remaining_elements.empty() || c == -1)
-	{
-		return true;
-	}
-	for (Element remaining_element : remaining_elements)
-	{
-		for (int i = 0; i < iterations; i++)
-		{
-			if (is_rotation_enabled)
-			{
-				remaining_element.rotate_right();
-			}
-			if (!can_be_placed(r, c, mat, remaining_element))
-			{
-				continue;
-			}
-			mat[r][c] = remaining_element;
-			vector<Element> remaining_elements_copy = remaining_elements;
-			remaining_elements_copy.erase(
-				remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element)
-				, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining _elements
-			const int next_r = r == 0 ? dimensions.first - 1 : r - 1;
-			const int next_c = next_r == dimensions.first - 1 ? c - 1 : c;
-			if (rec_solve(next_r, next_c, is_rotation_enabled, dimensions, mat, remaining_elements_copy, finished))
-			{
-				return true;
-			}
-			mat[r][c] = Element();
-		}
-	}
-	return false;
+	return c == -1;
 }
+
+pair<int, int> RightBottomRecursiveSolver::get_next_indices(const int r, const int c, const pair<int, int> dimensions) const
+{
+	const int next_r = r == 0 ? dimensions.first - 1 : r - 1;
+	const int next_c = next_r == dimensions.first - 1 ? c - 1 : c;
+	return pair<int, int>(next_r, next_c);
+
+}
+
