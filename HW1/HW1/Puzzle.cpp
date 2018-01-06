@@ -3,9 +3,50 @@
 #include <algorithm>
 #include <memory>
 #include <iostream>
+#include <cassert>
 #include <thread>
 
 using namespace std;
+
+
+namespace
+{
+	struct PuzzleErrorCategory : std::error_category
+	{
+		const char* name() const noexcept override;
+		std::string message(int env) const override;
+	};
+
+	const char* PuzzleErrorCategory::name() const noexcept
+	{
+		return "Puzzle Errors";
+	}
+
+	std::string PuzzleErrorCategory::message(int env) const
+	{
+		switch (static_cast<PuzzleErrorCode>(env))
+		{
+		case PuzzleErrorCode::sum_of_edges_not_zero_error:
+			return "Cannot solve puzzle: sum of edges is not zero";
+
+		case PuzzleErrorCode::missing_corners_error:
+			return "Cannot solve puzzle : missing corner element : ";
+
+		case PuzzleErrorCode::no_valid_dimensions_error:
+			return "Cannot solve puzzle: wrong number of straight edges";
+
+		default:
+			return "(unrecognized error)";
+		}
+	}
+
+	const PuzzleErrorCategory thePuzzleErrorCategory{};
+}
+
+std::error_code make_error_code(PuzzleErrorCode e)
+{
+	return {static_cast<int>(e), thePuzzleErrorCategory};
+}
 
 string corner_to_string(const Corner corner)
 {
@@ -23,8 +64,11 @@ string corner_to_string(const Corner corner)
 	return {};
 }
 
-
-vector<Corner> Puzzle::find_missing_corners()
+/**
+ * Checks if puzzle contains elements that can be placed in all 4 corners of the puzzle by iterating over elements and checking their edges
+ * Places missing corners in a vector to be used later
+ */
+vector<Corner> Puzzle::find_missing_corners(PuzzleErrorCode* ec)
 {
 	bool found_corners[4] = {false, false, false, false};
 	const int iterations = _is_rotation_enabled ? 4 : 1;
@@ -61,15 +105,19 @@ vector<Corner> Puzzle::find_missing_corners()
 		{
 			Corner corner = Corner(i);
 			missing_corners.push_back(corner);
+			*ec = PuzzleErrorCode::missing_corners_error;
 			ostringstream oss;
-			oss << "Cannot solve puzzle: missing corner element: " + corner_to_string(corner);
+			oss << make_error_code(*ec).message() + corner_to_string(corner);
 			_fout << oss.str() << endl;
 		}
 	}
 	return missing_corners;
 }
 
-bool Puzzle::validate_sum_of_edges()
+/**
+ * Checks that sum of all edges of elements is zero
+ */
+bool Puzzle::validate_sum_of_edges(PuzzleErrorCode* ec)
 {
 	int sum = 0;
 	for (const Element element : this->_elements)
@@ -82,11 +130,13 @@ bool Puzzle::validate_sum_of_edges()
 	if (sum != 0)
 	{
 		ostringstream oss;
-		oss << "Cannot solve puzzle: sum of edges is not zero";
+		*ec = PuzzleErrorCode::sum_of_edges_not_zero_error;
+		oss << make_error_code(*ec).message();
 		_fout << oss.str() << endl;
 	}
 	return sum == 0;
 }
+
 
 void Puzzle::print_solution_to_console(const vector<vector<Element>>& matrix)
 {
@@ -130,6 +180,10 @@ void Puzzle::print_solution(const vector<vector<Element>>& matrix) const
 	}
 }
 
+/**
+ * Splits the puzzle size to possible dimensions as a pair of <row_size, column_size>
+ * 
+ */
 vector<pair<int, int>> Puzzle::size_to_matrices() const
 {
 	vector<pair<int, int>> ret;
@@ -140,7 +194,7 @@ vector<pair<int, int>> Puzzle::size_to_matrices() const
 			ret.push_back(pair<int, int>(i, _size / i));
 		}
 	}
-	// sort by min dimention
+	// sort by min dimension
 	sort(ret.begin(), ret.end(), [](const pair<int, int>& a, const pair<int, int>& b) -> bool
 	{
 		int min_a = min(a.first, a.second);
@@ -150,7 +204,9 @@ vector<pair<int, int>> Puzzle::size_to_matrices() const
 	return ret;
 }
 
-
+/**
+ * Counts number of straight edges in puzzle
+ */
 int Puzzle::get_straight_edges_count()
 {
 	int cnt = 0;
@@ -164,7 +220,10 @@ int Puzzle::get_straight_edges_count()
 	return cnt;
 }
 
-vector<pair<int, int>> Puzzle::get_valid_dimensions(vector<pair<int, int>> dimensions)
+/**
+ *For every pair of dimensions, check if puzzle elements have enough straight edges on relevant sides to solve this
+ */
+vector<pair<int, int>> Puzzle::get_valid_dimensions(vector<pair<int, int>> dimensions, PuzzleErrorCode* ec)
 {
 	vector<pair<int, int>> valid_dimensions;
 	const int straight_edges_count = get_straight_edges_count();
@@ -177,79 +236,12 @@ vector<pair<int, int>> Puzzle::get_valid_dimensions(vector<pair<int, int>> dimen
 	}
 	if (valid_dimensions.empty())
 	{
+		*ec = PuzzleErrorCode::no_valid_dimensions_error;
 		ostringstream oss;
-		oss << "Cannot solve puzzle: wrong number of straight edges";
+		oss << make_error_code(*ec).message();
 		_fout << oss.str() << endl;
 	}
 	return valid_dimensions;
-}
-
-vector<vector<vector<Element>>> Puzzle::create_all_permutations_of_dimension(const pair<int, int> dimensions) const
-{
-	vector<Element> copy = _elements;
-	sort(copy.begin(), copy.end());
-	vector<vector<vector<Element>>> ret;
-	do
-	{
-		const vector<vector<Element>> mat = vector_to_mat(copy, dimensions);
-		ret.push_back(mat);
-	}
-	while (next_permutation(copy.begin(), copy.end()));
-	return ret;
-}
-
-vector<vector<Element>> Puzzle::vector_to_mat(vector<Element> copy, const pair<int, int> dimensions)
-{
-	int vectorIndex = 0;
-	vector<vector<Element>> ret;
-	for (int row = 0; row < int(dimensions.first); row++)
-	{
-		const vector<Element> vec;
-		ret.push_back(vec);
-		for (int col = 0; col < int(dimensions.second); col++)
-		{
-			ret[row].push_back(copy[vectorIndex]);
-			vectorIndex++;
-		}
-	}
-	return ret;
-}
-
-Element Puzzle::get_element(const vector<vector<Element>>& mat, const int r, const int c)
-{
-	if (r < 0 || c < 0 || r >= int(mat.size()) || c >= int(mat[r].size()))
-	{
-		return {0, 0, 0, 0, 0};
-	}
-	return mat[r][c];
-}
-
-bool Puzzle::verify_matrix(vector<vector<Element>> mat)
-{
-	for (int r = 0; r < int(mat.size()); r++)
-	{
-		for (int c = 0; c < int(mat[r].size()); c++)
-		{
-			const auto elem = mat[r][c];
-			if (get_element(mat, r - 1, c)._bottom + elem._top != 0)
-			{
-				return false;
-			}
-			if (get_element(mat, r + 1, c)._top + elem._bottom != 0)
-			{
-				return false;
-			}
-			if (get_element(mat, r, c - 1)._right + elem._left != 0)
-			{
-				return false;
-			}
-			if (get_element(mat, r, c + 1)._left + elem._right != 0)
-			{
-				return false;
-			}
-		}
-	}
-	return true;
 }
 
 
@@ -268,10 +260,16 @@ vector<vector<Element>> Puzzle::create_empty_mat(const pair<int, int>& dimension
 	return ret;
 }
 
+/**
+ * Checks from which side the solver should start solving to get quicker results.
+ * The quickest side is the one with less elements that can be placed in that edge
+ * Returns a vector of solvers sorted from quickest to slowest
+ */
 vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 {
 	vector<shared_ptr<BaseSolver>> ret;
 	double edges_count[4] = {0, 0, 0, 0};
+	// 1. Give points to every side according to the edges of each element
 	for (const Element element : _elements)
 	{
 		edges_count[0] += (element._left == 0 ? 1 : 0);
@@ -303,6 +301,7 @@ vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 	}
 
 	int sorted_edges_order[4] = {-1, -1, -1, -1};
+	//2. Sort the 4 sides from quickest to slowest (get array of indices)
 	for (int& i : sorted_edges_order)
 	{
 		double min_elem = 1000.0;
@@ -322,6 +321,7 @@ vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 		i = min_index;
 	}
 	cout << endl;
+	//3. Populate vector with solvers according to sorted indices
 	for (int& index : sorted_edges_order)
 	{
 		cout << index << " ";
@@ -350,20 +350,39 @@ vector<shared_ptr<BaseSolver>> Puzzle::choose_solver()
 	return ret;
 }
 
+/**
+ * Returns the element in pisition <r, c> in given matrix
+ */
+Element Puzzle::get_element(const vector<vector<Element>>& mat, const int r, const int c)
+{
+	if (r < 0 || c < 0 || r >= int(mat.size()) || c >= int(mat[r].size()))
+	{
+		return {0, 0, 0, 0, 0};
+	}
+	return mat[r][c];
+}
+
+/**
+ * Solves to puzzle using multi-threads. If there is a solution it will print to output file.
+ */
 void Puzzle::solve()
 {
+	PuzzleErrorCode ec = PuzzleErrorCode::no_errors;
 	const vector<pair<int, int>> dimensions = size_to_matrices();
-	vector<pair<int, int>> valid_dimensions = get_valid_dimensions(dimensions);
-	vector<Corner> missing_corners = find_missing_corners();
-	const bool is_sum_zero = validate_sum_of_edges();
+	vector<pair<int, int>> valid_dimensions = get_valid_dimensions(dimensions, &ec);
+	vector<Corner> missing_corners = find_missing_corners(&ec);
+	const bool is_sum_zero = validate_sum_of_edges(&ec);
 	vector<thread> vec_threads(_thread_cnt - 1);
 
+	//1. Validate puzzle and make sure program can start solving
 	if (!is_sum_zero || !missing_corners.empty() || valid_dimensions.empty())
 	{
 		return;
 	}
-
+	assert(ec == PuzzleErrorCode::no_errors);
+	//2. Get vector of solvers sorted by speed
 	vector<shared_ptr<BaseSolver>> solvers = choose_solver();
+
 
 	for (pair<int, int> row_col_pair : valid_dimensions)
 	{
@@ -374,9 +393,8 @@ void Puzzle::solve()
 		{
 			vector<Element> elements_copy = _elements;
 			vector<vector<Element>> mat = create_empty_mat(row_col_pair);
-			//shared_ptr<BaseSolver> my_solver = make_shared<TopLeftRecursiveSolver>(); //FOR TESTING
+			//3. Try to solve for this dimensions
 			if (solvers[0]->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy, _finished))
-			//if (my_solver->solve(row_col_pair, _is_rotation_enabled, mat, elements_copy, _finished))
 			{
 				print_solution(mat);
 				return;
@@ -384,15 +402,18 @@ void Puzzle::solve()
 			continue;
 		}
 
+		//each thread will solve the puzzle from a different direction
 		for (int i = 0; i < _thread_cnt - 1; i++)
 		{
 			vec_threads[i] = thread(&Puzzle::thread_solve, this, row_col_pair, solvers[i]);
 		}
 
+		//TODO: Snir please comment here after you fix
 		unique_lock<mutex> lock(_mutex);
 		_cv.wait(lock, [this] { return _finished; });
 		lock.unlock();
 
+		//TODO: Snir please comment here after you fix
 		for (thread& t : vec_threads)
 		{
 			t.join();
@@ -406,10 +427,15 @@ void Puzzle::solve()
 	this->_fout << "Cannot solve puzzle: it seems that there is no proper solution" << endl;
 }
 
+/**
+ * When a thread finishes to solve it gets here. It checks if another thread finished earlier. 
+ * If not then it sets the solved puzzle (if it found a solution)
+ * All this happens with a locked mutex
+ */
 void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
 {
 	unique_lock<mutex> lock(_mutex);
-	if (_finished)
+	if (_finished) //someone else finished before
 	{
 		lock.unlock();
 		_cv.notify_all();
@@ -425,6 +451,9 @@ void Puzzle::set_solution(const vector<vector<Element>>& mat, bool solved)
 	_cv.notify_all();
 }
 
+/**
+ * Each thread tries to solve the puzzle. The first to finish is the one that determines the solution, if one exists
+ */
 void Puzzle::thread_solve(pair<int, int> row_col_pair, const shared_ptr<BaseSolver>& solver)
 {
 	vector<Element> elements_copy;
