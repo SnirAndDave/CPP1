@@ -63,6 +63,80 @@ std::error_code make_error_code(ParserErrorCode e)
 	return {static_cast<int>(e), theParserErrorCategory};
 }
 
+
+/**
+* Checks if given flag exists in cmd line
+*/
+bool Parser::cmdOptionExists(vector<string> vec, const std::string& option)
+{
+	return std::find(vec.begin(), vec.end(), option) != vec.end();
+}
+
+/**
+* Returns index of given flag in cmd line
+*/
+int Parser::cmdOptionIndex(vector<string> vec, const std::string& option)
+{
+	const auto it = std::find(vec.begin(), vec.end(), option);
+	if (it == vec.end())
+	{
+		return -1;
+	}
+	const auto index = std::distance(vec.begin(), it);
+	return index;
+}
+
+string Parser::getCmdOption(vector<string> vec, const std::string& option)
+{
+	return vec[cmdOptionIndex(vec, option)];
+}
+
+/**
+* Parse arguments from command line. Handles the flags -rotate and -threads
+*/
+void Parser::parse_arguments(const int argc, char* argv[])
+{
+	const string rotate = "-rotate";
+	const string threads = "-threads";
+	vector<string> argv_vec(argv, argv + argc);
+	if (argc == 3)
+	{
+		_fin_path = argv_vec[1];
+		_fout_path = argv_vec[2];
+		return;
+	}
+	if (cmdOptionExists(argv_vec, rotate))
+	{
+		_rotation_enabled = true;
+		argv_vec.erase(std::find(argv_vec.begin(), argv_vec.end(), rotate));
+	}
+	if (cmdOptionExists(argv_vec, threads))
+	{
+		const int index = cmdOptionIndex(argv_vec, threads);
+		if (index + 1 >= int(argv_vec.size()))
+		{
+			// -threads is the last argument
+			cout << "usage: -threads THREAD_COUNT" << endl;
+
+			throw invalid_argument(threads);
+		}
+		try
+		{
+			_thread_cnt = stoi(argv_vec[index + 1]);
+		}
+		catch (exception ex)
+		{
+			cout << "usage: -threads THREAD_COUNT" << endl;
+			throw invalid_argument(threads);
+		}
+		argv_vec.erase(argv_vec.begin() + index + 1);
+		argv_vec.erase(argv_vec.begin() + index);
+	}
+	_fin_path = argv_vec[1];
+	_fout_path = argv_vec[2];
+}
+
+
 /**
  * Checks if all IDs exist in elements, from 1 to NumElements given in first line
  * Adds missing elements to a vector to be used later
@@ -212,7 +286,7 @@ int Parser::process_first_line(const string& line, string& msg, ParserErrorCode*
 	return stoi(num);
 }
 
-int Parser::parse_edge(const string& edge, string& msg) const
+int Parser::parse_edge(const string& edge) const
 {
 	if (!is_digits_with_minus(edge))
 	{
@@ -278,10 +352,10 @@ void Parser::process_line(const string& line, vector<int>& wrong_ids, vector<str
 	//parse element's edges
 	try
 	{
-		const int left = parse_edge(delimited[1], msg);
-		const int top = parse_edge(delimited[2], msg);
-		const int right = parse_edge(delimited[3], msg);
-		const int bottom = parse_edge(delimited[4], msg);
+		const int left = parse_edge(delimited[1]);
+		const int top = parse_edge(delimited[2]);
+		const int right = parse_edge(delimited[3]);
+		const int bottom = parse_edge(delimited[4]);
 
 		const Element el(id, left, top, right, bottom);
 		elements.push_back(el);

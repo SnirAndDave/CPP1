@@ -11,14 +11,11 @@ public:
 	~LeftTopRecursiveSolver();
 	bool solve(pair<int, int>& dimensions, const bool is_rotation_enabled,
 	           vector<vector<Element>>& puzzle, vector<Element>& remaining_elements, const bool& finished) override;
-	static bool can_be_placed(const int r, const int c, const pair<int, int>& dimensions,
-	                          const vector<vector<Element>>& mat,
-	                          const Element& element);
 protected:
 	void sort_elements(vector<Element>& elements) override;
-private:
-
-	bool rec_solve(int r, int c, const bool is_rotation_enabled, pair<int, int>& dimensions,
-	               vector<vector<Element>>& mat, vector<Element>& remaining_elements, const bool& finished) const;
+	bool can_be_placed(const int r, const int c, const vector<vector<Element>>& mat, const Element& element,
+		pair<int, int>) const override;
+	bool halt_condition(const int, const int, pair<int, int>) const override;
+	pair<int, int> get_next_indices(const int r, const int c, const pair<int, int>) const override;
 };
 #endif

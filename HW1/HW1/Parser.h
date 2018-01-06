@@ -34,6 +34,13 @@ std::error_code make_error_code(ParserErrorCode);
 class Parser
 {
 public:
+
+	Parser()
+		: _rotation_enabled(false),
+		  _thread_cnt(4)
+	{
+	}
+
 	static bool get_missing_elements(const Puzzle& puzzle, vector<int>& missing_elements);
 	bool check_if_valid_and_report_error(const Puzzle& puzzle, ofstream& fout, vector<int>& missing_elements,
 	                                     vector<int>& wrong_ids, vector<string>& bad_format_lines,
@@ -42,7 +49,7 @@ public:
 	bool parse(ifstream& fin, Puzzle& puzzle, ofstream& fout, ParserErrorCode* ec) const;
 
 	int process_first_line(const string& line, string& msg, ParserErrorCode* ec) const;
-	int parse_edge(const string& edge, string& msg) const;
+	int parse_edge(const string& edge) const;
 	static bool is_digits(const string& str);
 	static bool is_digits_with_minus(const string& str);
 
@@ -52,8 +59,15 @@ public:
 	                  elements_count, vector<Element>& elements, ParserErrorCode* ec) const;
 	static void clean_spaces(string& str);
 	vector<string> split(const string& s, char delim) const;
-
+	void parse_arguments(const int argc, char * argv[]);
+	string _fout_path;
+	string _fin_path;
+	bool _rotation_enabled;
+	int _thread_cnt;
 private:
+	bool cmdOptionExists(vector<string> vec, const std::string& option);
+	int cmdOptionIndex(vector<string> vec, const std::string& option);
+	string getCmdOption(vector<string> vec, const std::string& option);
 };
 
 #endif

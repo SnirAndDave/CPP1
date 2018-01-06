@@ -36,6 +36,11 @@ void BottomLeftRecursiveSolver::sort_elements(vector<Element>& elements)
 	});
 }
 
+bool BottomLeftRecursiveSolver::halt_condition(const int r, const int , pair<int, int>) const
+{
+	return r == -1;
+}
+
 bool BottomLeftRecursiveSolver::solve(pair<int, int>& dimensions, const bool is_rotation_enabled,
                                       vector<vector<Element>>& puzzle, vector<Element>& remaining_elements, const bool& finished)
 {
@@ -43,9 +48,9 @@ bool BottomLeftRecursiveSolver::solve(pair<int, int>& dimensions, const bool is_
 	return rec_solve(dimensions.first - 1, 0, is_rotation_enabled, dimensions, puzzle, remaining_elements, finished);
 }
 
-bool BottomLeftRecursiveSolver::can_be_placed(const int r, const int c, const pair<int, int>& dimensions,
+bool BottomLeftRecursiveSolver::can_be_placed(const int r, const int c,
                                               const vector<vector<Element>>& mat,
-                                              const Element& element)
+                                              const Element& element, pair<int, int> dimensions) const
 {
 	if (Puzzle::get_element(mat, r + 1, c)._top + element._bottom != 0)
 	{
@@ -66,45 +71,10 @@ bool BottomLeftRecursiveSolver::can_be_placed(const int r, const int c, const pa
 	return true;
 }
 
-
-bool BottomLeftRecursiveSolver::rec_solve(const int r, const int c, const bool is_rotation_enabled,
-                                          pair<int, int>& dimensions,
-                                          vector<vector<Element>>& mat, vector<Element>& remaining_elements, const bool& finished) const
+pair<int, int> BottomLeftRecursiveSolver::get_next_indices(const int r, const int c,
+	const pair<int, int> dimensions) const
 {
-	if (finished)
-	{
-		throw exception();
-	}
-	const int iterations = is_rotation_enabled ? 4 : 1;
-	if (remaining_elements.empty() || r == -1)
-	{
-		return true;
-	}
-	for (Element remaining_element : remaining_elements)
-	{
-		for (int i = 0; i < iterations; i++)
-		{
-			if (is_rotation_enabled)
-			{
-				remaining_element.rotate_right();
-			}
-			if (!can_be_placed(r, c, dimensions, mat, remaining_element))
-			{
-				continue;
-			}
-			mat[r][c] = remaining_element;
-			vector<Element> remaining_elements_copy = remaining_elements;
-			remaining_elements_copy.erase(
-				remove(remaining_elements_copy.begin(), remaining_elements_copy.end(), remaining_element)
-				, remaining_elements_copy.end()); // remove the element we placed in the puzzle from the remaining _elements
-			const int next_c = (c + 1) % dimensions.second;
-			const int next_r = next_c == 0 ? r - 1 : r;
-			if (rec_solve(next_r, next_c, is_rotation_enabled, dimensions, mat, remaining_elements_copy, finished))
-			{
-				return true;
-			}
-			mat[r][c] = Element();
-		}
-	}
-	return false;
+	const int next_c = (c + 1) % dimensions.second;
+	const int next_r = next_c == 0 ? r - 1 : r;
+	return pair<int, int>(next_r, next_c);
 }
