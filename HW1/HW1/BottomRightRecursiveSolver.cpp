@@ -45,7 +45,7 @@ bool BottomRightRecursiveSolver::solve(pair<int, int>& dimensions, const bool is
 
 }
 
-bool BottomRightRecursiveSolver::can_be_placed(const int r, const int c, const pair<int, int>& dimensions,
+bool BottomRightRecursiveSolver::can_be_placed(const int r, const int c,
                                                const vector<vector<Element>>& mat,
                                                const Element& element)
 {
@@ -90,7 +90,7 @@ bool BottomRightRecursiveSolver::rec_solve(const int r, const int c, const bool 
 			{
 				remaining_element.rotate_right();
 			}
-			if (!can_be_placed(r, c, dimensions, mat, remaining_element))
+			if (!can_be_placed(r, c, mat, remaining_element))
 			{
 				continue;
 			}
